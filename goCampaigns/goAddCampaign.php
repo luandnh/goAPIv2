@@ -1754,6 +1754,50 @@
 						);
 					}
 				}
+				else{
+					
+						// Dispositions Copy
+						$resp =  $astDB->rawQuery("SELECT DISTINCT * FROM vicidial_statuses WHERE selectable='Y' GROUP BY `status`");
+						if ($astDB->count > 0) {
+							foreach ($resp as $fresults) {
+								$dataStat[] 					= $fresults["status"];			
+								$dataStatName[] 				= $fresults["status_name"];
+								$dataSelectable[]				= $fresults["selectable"];
+								$dataHumanAns[] 				= $fresults["human_answered"];
+								$dataCategory[] 				= $fresults["category"];
+								$dataSale[] 					= $fresults["sale"];
+								$dataDNC[]						= $fresults["dnc"];
+								$dataCustContact[]				= $fresults["customer_contact"];
+								$dataNI[]						= $fresults["not_interested"];
+								$dataUnworkable[] 				= $fresults["unworkable"];
+								$dataScheduled[] 				= $fresults["scheduled_callback"];
+							}
+							$tableQuery 				= "SHOW tables LIKE 'go_statuses';";
+							$checkTable 				= $goDB->rawQuery($tableQuery);
+
+							$i = 0;
+							foreach($dataStat as $stat){
+								$data						= array(
+									"status"					=> $dataStat[$i], 	
+									"status_name"				=> $dataStatName[$i],
+									"selectable"				=> $dataSelectable[$i], 
+									"campaign_id"				=> $campaign_id,
+									"human_answered"			=> $dataHumanAns[$i],
+									"category"					=> $dataCategory[$i],
+									"sale"						=> $dataSale[$i],
+									"dnc"						=> $dataDNC[$i],
+									"customer_contact"			=> $dataCustContact[$i],
+									"not_interested"			=> $dataNI[$i],
+									"unworkable"				=> $dataUnworkable[$i],
+									"scheduled_callback"		=> $dataScheduled[$i]
+								);
+								$astDB->insert("vicidial_campaign_statuses", $data);
+								$log_id 					= log_action($goDB, 'ADD', $log_user, $log_ip, "Add Disposition " . $dataStat[$i] . " on Campaign $campaign_id", $log_group, $astDB->getLastQuery());
+								$i++;
+							}
+						}
+
+				}
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
@@ -1764,5 +1808,3 @@
 			);		
 		}
 	}
-
-?>
