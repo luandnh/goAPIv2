@@ -268,7 +268,7 @@
 							'manual_dial_filter' 				=> 'NONE',
 							'manual_dial_search_filter'			=> 'CAMPLISTS_ALL', 
 							'user_group' 						=> $tenant_id,	
-							'manual_dial_list_id' 				=> $tenant_id.'998', 
+							'manual_dial_list_id' 				=> '998', 
 							'drop_call_seconds' 				=> 7, 
 							'campaign_vdad_exten' 				=> $ans_machine_detection, 
 							'disable_alter_custdata' 			=> 'N', 
