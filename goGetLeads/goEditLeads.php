@@ -1,5 +1,6 @@
 <?php
- /**
+
+/**
  * @file 		goEditLeads.php
  * @brief 		API for Editing Leads
  * @copyright 	Copyright (C) 2018 GOautodial Inc.
@@ -20,255 +21,281 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
-    include_once ("goAPI.php");
+include_once("goAPI.php");
 
-	$list_id 											= $astDB->escape($_REQUEST["list_id"]);
-	$lead_id 											= $astDB->escape($_REQUEST["lead_id"]);
-	$first_name 										= $astDB->escape($_REQUEST["first_name"]);
-	$middle_initial 									= $astDB->escape($_REQUEST["middle_initial"]);
-	$last_name 											= $astDB->escape($_REQUEST["last_name"]);
-	$gender 											= $astDB->escape($_REQUEST["gender"]);
-	$email 												= $astDB->escape($_REQUEST["email"]);
-	$phone_number 										= $astDB->escape($_REQUEST["phone_number"]);
-	$alt_phone 											= $astDB->escape($_REQUEST["alt_phone"]);
-	$address1 											= $astDB->escape($_REQUEST["address1"]);
-	$address2 											= $astDB->escape($_REQUEST["address2"]);
-	$address3 											= $astDB->escape($_REQUEST["address3"]);
-	$city 												= $astDB->escape($_REQUEST["city"]);
-	$state 												= $astDB->escape($_REQUEST["state"]);
-	$province 											= $astDB->escape($_REQUEST["province"]);
-	$postal_code 										= $astDB->escape($_REQUEST["postal_code"]);
-	$country_code 										= $astDB->escape($_REQUEST["country_code"]);
-	$date_of_birth 										= $astDB->escape($_REQUEST["date_of_birth"]);
-	$title 												= $astDB->escape($_REQUEST["title"]);
-	$status 											= $astDB->escape($_REQUEST["status"]);
-	$comments											= $astDB->escape($_REQUEST["comments"]);
-	$is_customer 										= $astDB->escape($_REQUEST["is_customer"]);
-	$user_id 											= $astDB->escape($_REQUEST["user_id"]);
-	$user 												= $astDB->escape($_REQUEST["user"]);
-	$avatar 											= $astDB->escape($_REQUEST["avatar"]); //base64 encoded	
-	$defGender 											= array("M", "F", "U");
-    $custom_fields                                      = $_REQUEST["custom_fields"];
-	
-	// ERROR CHECKING 
-	if (empty($goUser) || is_null($goUser)) {
-		$apiresults 									= array(
-			"result" 										=> "Error: goAPI User Not Defined."
-		);
-	} elseif (empty($goPass) || is_null($goPass)) {
-		$apiresults 									= array(
-			"result" 										=> "Error: goAPI Password Not Defined."
-		);
-	} elseif (empty($log_user) || is_null($log_user)) {
-		$apiresults 									= array(
-			"result" 										=> "Error: Session User Not Defined."
-		);
-	} elseif (empty($lead_id) || is_null($lead_id)) {
-		$err_msg 										= error_handle("40001");
-		$apiresults 									= array(
-			"code" 											=> "40001", 
-			"result" 										=> $err_msg 
-		);
-	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", $first_name) && !empty($first_name)) {
-		$err_msg 										= error_handle("41004", "first_name");
-		$apiresults 									= array(
-			"code" 											=> "41004", 
-			"result" 										=> $err_msg
-		);
-	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", $middle_initial) && !empty($middle_initial)) {
-		$err_msg 										= error_handle("41004", "middle_initial");
-		$apiresults 									= array(
-			"code" 											=> "41004", 
-			"result" 										=> $err_msg
-		);
-	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", $last_name) && !empty($last_name)) {
-		$err_msg 										= error_handle("41004", "last_name");
-		$apiresults 									= array(
-			"code" 											=> "41004", 
-			"result" 										=> $err_msg
-		);
-	} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", $phone_number) && !empty($phone_number)) {
-		$err_msg 										= error_handle("41004", "phone_number");
-		$apiresults 									= array(
-			"code" 											=> "41004", 
-			"result" 										=> $err_msg
-		);
-	} elseif (!in_array($gender,$defGender) && $gender != null) {
-		$err_msg 										= error_handle("41006", "gender");
-		$apiresults 									= array(
-			"code" 											=> "41006", 
-			"result" 										=> $err_msg
-		);
-	} elseif(preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", $web_form_address)) {
-		$err_msg 										= error_handle("41004", "web_form_address");
-		$apiresults 									= array(
-			"code" 											=> "41004", 
-			"result" 										=> $err_msg
-		);
-	} else {
-		// check if goUser and goPass are valid
-		$fresults										= $astDB
-			->where("user", $goUser)
-			->where("pass_hash", $goPass)
-			->getOne("vicidial_users", "user,user_level");
-		
-		$goapiaccess									= $astDB->getRowCount();
-		$userlevel										= $fresults["user_level"];
-		
-		if ($goapiaccess > 0 && $userlevel > 7) {	
-			// check lead_id if it exists
+$list_id 											= $astDB->escape($_REQUEST["list_id"]);
+$lead_id 											= $astDB->escape($_REQUEST["lead_id"]);
+$first_name 										= $astDB->escape($_REQUEST["first_name"]);
+$middle_initial 									= $astDB->escape($_REQUEST["middle_initial"]);
+$last_name 											= $astDB->escape($_REQUEST["last_name"]);
+$gender 											= $astDB->escape($_REQUEST["gender"]);
+$email 												= $astDB->escape($_REQUEST["email"]);
+$phone_number 										= $astDB->escape($_REQUEST["phone_number"]);
+$alt_phone 											= $astDB->escape($_REQUEST["alt_phone"]);
+$address1 											= $astDB->escape($_REQUEST["address1"]);
+$address2 											= $astDB->escape($_REQUEST["address2"]);
+$address3 											= $astDB->escape($_REQUEST["address3"]);
+$city 												= $astDB->escape($_REQUEST["city"]);
+$state 												= $astDB->escape($_REQUEST["state"]);
+$province 											= $astDB->escape($_REQUEST["province"]);
+$postal_code 										= $astDB->escape($_REQUEST["postal_code"]);
+$country_code 										= $astDB->escape($_REQUEST["country_code"]);
+$date_of_birth 										= $astDB->escape($_REQUEST["date_of_birth"]);
+$title 												= $astDB->escape($_REQUEST["title"]);
+$status 											= $astDB->escape($_REQUEST["status"]);
+$comments											= $astDB->escape($_REQUEST["comments"]);
+$is_customer 										= $astDB->escape($_REQUEST["is_customer"]);
+$user_id 											= $astDB->escape($_REQUEST["user_id"]);
+$user 												= $astDB->escape($_REQUEST["user"]);
+// NEW - LUANDNH
+$identity_number									= $astDB->escape($_REQUEST["identity_number"]);
+$identity_issued_by									= $astDB->escape($_REQUEST["identity_issued_by"]);
+$identity_issued_on									= $astDB->escape($_REQUEST["identity_issued_on"]);
+$vendor_lead_code									= $astDB->escape($_REQUEST["vendor_lead_code"]);
+
+$avatar 											= $astDB->escape($_REQUEST["avatar"]); //base64 encoded	
+$defGender 											= array("M", "F", "U");
+$custom_fields                                      = $_REQUEST["custom_fields"];
+
+// ERROR CHECKING 
+if (empty($goUser) || is_null($goUser)) {
+	$apiresults 									= array(
+		"result" 										=> "Error: goAPI User Not Defined."
+	);
+} elseif (empty($goPass) || is_null($goPass)) {
+	$apiresults 									= array(
+		"result" 										=> "Error: goAPI Password Not Defined."
+	);
+} elseif (empty($log_user) || is_null($log_user)) {
+	$apiresults 									= array(
+		"result" 										=> "Error: Session User Not Defined."
+	);
+} elseif (empty($lead_id) || is_null($lead_id)) {
+	$err_msg 										= error_handle("40001");
+	$apiresults 									= array(
+		"code" 											=> "40001",
+		"result" 										=> $err_msg
+	);
+} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", $first_name) && !empty($first_name)) {
+	$err_msg 										= error_handle("41004", "first_name");
+	$apiresults 									= array(
+		"code" 											=> "41004",
+		"result" 										=> $err_msg
+	);
+} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", $middle_initial) && !empty($middle_initial)) {
+	$err_msg 										= error_handle("41004", "middle_initial");
+	$apiresults 									= array(
+		"code" 											=> "41004",
+		"result" 										=> $err_msg
+	);
+} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", $last_name) && !empty($last_name)) {
+	$err_msg 										= error_handle("41004", "last_name");
+	$apiresults 									= array(
+		"code" 											=> "41004",
+		"result" 										=> $err_msg
+	);
+} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", $phone_number) && !empty($phone_number)) {
+	$err_msg 										= error_handle("41004", "phone_number");
+	$apiresults 									= array(
+		"code" 											=> "41004",
+		"result" 										=> $err_msg
+	);
+} elseif (!in_array($gender, $defGender) && $gender != null) {
+	$err_msg 										= error_handle("41006", "gender");
+	$apiresults 									= array(
+		"code" 											=> "41006",
+		"result" 										=> $err_msg
+	);
+} elseif (preg_match("/[\"^£$%&*()}{@#~?><>,|=_+¬]/", $web_form_address)) {
+	$err_msg 										= error_handle("41004", "web_form_address");
+	$apiresults 									= array(
+		"code" 											=> "41004",
+		"result" 										=> $err_msg
+	);
+} else {
+	// check if goUser and goPass are valid
+	$fresults										= $astDB
+		->where("user", $goUser)
+		->where("pass_hash", $goPass)
+		->getOne("vicidial_users", "user,user_level");
+
+	$goapiaccess									= $astDB->getRowCount();
+	$userlevel										= $fresults["user_level"];
+
+	if ($goapiaccess > 0 && $userlevel > 7) {
+		// check lead_id if it exists
+		$astDB->where("lead_id", $lead_id);
+		$fresultsv 									= $astDB->get("vicidial_list");
+
+		if ($astDB->count > 0) {
+			foreach ($fresultsv as $fresults) {
+				$data_first_name 					= $fresults["first_name"];
+				$data_middle_initial 				= $fresults["middle_initial"];
+				$data_last_name 					= $fresults["last_name"];
+				$data_gender 						= $fresults["gender"];
+				$data_email 						= $fresults["email"];
+				$data_phone_number 					= $fresults["phone_number"];
+				$data_alt_phone 					= $fresults["alt_phone"];
+				$data_address1 						= $fresults["address1"];
+				$data_address2 						= $fresults["address2"];
+				$data_address3 						= $fresults["address3"];
+				$data_city 							= $fresults["city"];
+				$data_state							= $fresults["state"];
+				$data_province						= $fresults["province"];
+				$data_postal_code 					= $fresults["postal_code"];
+				$data_country_code 					= $fresults["country_code"];
+				$data_date_of_birth 				= $fresults["date_of_birth"];
+				$data_title 						= $fresults["title"];
+				$data_status 						= $fresults["status"];
+				// NEW - LUANDNH
+				$data_identity_number				= $fresults["identity_number"];
+				$data_identity_issued_by			= $fresults["identity_issued_by"];
+				$data_identity_issued_on			= $fresults["identity_issued_on"];
+				$data_vendor_lead_code				= $fresults["vendor_lead_code"];
+			}
+
+			if (empty($first_name))
+				$first_name 						= $data_first_name;
+			if (empty($middle_initial))
+				$middle_initial 					= $data_middle_initial;
+			if (empty($last_name))
+				$last_name 							= $data_last_name;
+			if (empty($gender))
+				$gender 							= $data_gender;
+			if (empty($email))
+				$email 								= $data_email;
+			if (empty($phone_number))
+				$phone_number     					= $data_phone_number;
+			if (empty($alt_phone))
+				$alt_phone 							= $data_alt_phone;
+			if (empty($address1))
+				$address1							= $data_address1;
+			if (empty($address2))
+				$address2							= $data_address2;
+			if (empty($address3))
+				$address3							= $data_address3;
+			if (empty($city))
+				$city								= $data_city;
+			if (empty($state))
+				$state								= $data_state;
+			if (empty($province))
+				$province							= $data_province;
+			if (empty($postal_code))
+				$postal_code						= $data_postal_code;
+			if (empty($country_code))
+				$country_code						= $data_country_code;
+			if (empty($date_of_birth))
+				$date_of_birth						= $data_date_of_birth;
+			if (empty($title))
+				$title								= $data_title;
+			if (empty($status))
+				$status								= $data_status;
+			// NEW - LUANDNH
+			if (empty($identity_number))
+				$identity_number					= $data_identity_number;
+			if (empty($identity_issued_by))
+				$identity_issued_by					= $data_identity_issued_by;
+			if (empty($identity_issued_on))
+				$identity_issued_on					= $data_identity_issued_on;
+			if (empty($vendor_lead_code))
+				$vendor_lead_code					= $data_vendor_lead_code;
+
+			$data									= array(
+				"first_name"							=> $first_name,
+				"middle_initial"						=> $middle_initial,
+				"last_name"								=> $last_name,
+				"gender"								=> $gender,
+				"email"									=> $email,
+				"phone_number"							=> $phone_number,
+				"alt_phone"								=> $alt_phone,
+				"address1"								=> $address1,
+				"address2"								=> $address2,
+				"address3"								=> $address3,
+				"city"									=> $city,
+				"state"									=> $state,
+				"province"								=> $province,
+				"postal_code"							=> $postal_code,
+				"country_code"							=> $country_code,
+				"date_of_birth"							=> $date_of_birth,
+				"title"									=> $title,
+				"status"								=> $status,
+				"comments"								=> $comments,
+				"identity_number" 						=> $identity_number,
+				"identity_issued_by" 					=> $identity_issued_by,
+				"identity_issued_on" 					=> $identity_issued_on,
+				"vendor_lead_code"						=> $vendor_lead_code,
+			);
+
 			$astDB->where("lead_id", $lead_id);
-			$fresultsv 									= $astDB->get("vicidial_list");
-			
-			if ($astDB->count > 0) {
-				foreach ($fresultsv as $fresults) {
-					$data_first_name 					= $fresults["first_name"];
-					$data_middle_initial 				= $fresults["middle_initial"];
-					$data_last_name 					= $fresults["last_name"];
-					$data_gender 						= $fresults["gender"];
-					$data_email 						= $fresults["email"];
-					$data_phone_number 					= $fresults["phone_number"];
-					$data_alt_phone 					= $fresults["alt_phone"];
-					$data_address1 						= $fresults["address1"];
-					$data_address2 						= $fresults["address2"];
-					$data_address3 						= $fresults["address3"];
-					$data_city 							= $fresults["city"];
-					$data_state							= $fresults["state"];
-					$data_province						= $fresults["province"];
-					$data_postal_code 					= $fresults["postal_code"];
-					$data_country_code 					= $fresults["country_code"];
-					$data_date_of_birth 				= $fresults["date_of_birth"];
-					$data_title 						= $fresults["title"];
-					$data_status 						= $fresults["status"];
+			$astDB->update("vicidial_list", $data);
+
+			if (!empty($custom_fields)) {
+				foreach ($custom_fields as $field => $value) {
+					$cf_data[$field] = $astDB->escape($value);
 				}
-				
-				if (empty($first_name))
-					$first_name 						= $data_first_name;
-				if  (empty($middle_initial))
-					$middle_initial 					= $data_middle_initial;
-				if (empty($last_name))
-					$last_name 							= $data_last_name;
-				if (empty($gender))
-					$gender 							= $data_gender;
-				if (empty($email))
-					$email 								= $data_email;
-				if (empty($phone_number))
-					$phone_number     					= $data_phone_number;
-				if (empty($alt_phone))
-					$alt_phone 							= $data_alt_phone;
-				if (empty($address1))
-					$address1							= $data_address1;
-				if (empty($address2))
-					$address2							= $data_address2;
-				if (empty($address3))
-					$address3							= $data_address3;
-				if (empty($city))
-					$city								= $data_city;
-				if (empty($state))
-					$state								= $data_state;
-				if (empty($province))
-					$province							= $data_province;
-				if (empty($postal_code))
-					$postal_code						= $data_postal_code;
-				if (empty($country_code))
-					$country_code						= $data_country_code;
-				if (empty($date_of_birth))
-					$date_of_birth						= $data_date_of_birth;
-				if (empty($title))
-					$title								= $data_title;
-				if (empty($status))
-					$status								= $data_status;
-					
-				$data									= array(
-					"first_name"							=> $first_name,
-					"middle_initial"						=> $middle_initial,
-					"last_name"								=> $last_name,
-					"gender"								=> $gender,
-					"email"									=> $email,
-					"phone_number"							=> $phone_number,
-					"alt_phone"								=> $alt_phone,
-					"address1"								=> $address1,
-					"address2"								=> $address2,
-					"address3"								=> $address3,
-					"city"									=> $city,
-					"state"									=> $state,
-					"province"								=> $province,
-					"postal_code"							=> $postal_code,
-					"country_code"							=> $country_code,
-					"date_of_birth"							=> $date_of_birth,
-					"title"									=> $title,
-					"status"								=> $status,
-					"comments"								=> $comments,
-				);
 
 				$astDB->where("lead_id", $lead_id);
-				$astDB->update("vicidial_list", $data);
-                
-                if (!empty($custom_fields)) {
-                    foreach ($custom_fields as $field => $value) {
-                        $cf_data[$field] = $astDB->escape($value);
-                    }
-                    
-                    $astDB->where("lead_id", $lead_id);
-                    $rslt = $astDB->get("custom_{$list_id}");
-                    
-                    if ($astDB->count > 0) {
-                        $astDB->where("lead_id", $lead_id);
-                        $astDB->update("custom_{$list_id}", $cf_data);
-                    } else {
-                        $cf_data["lead_id"] = $lead_id;
-                        $astDB->insert("custom_{$list_id}", $cf_data);
-                    }
-                }
-				
-				$log_id 								= log_action($goDB, "MODIFY", $log_user, $log_ip, "Modified the Lead ID: $lead_id", $log_group, $astDB->getLastQuery());
-					
-				// check if existing customer
-				$goDB->where("lead_id", $lead_id);
-				$goDB->getOne("go_customers", "lead_id");
-								
-				if ($goDB->count < 1) {
-					if ($is_customer > 0) {
-						$datago                                         = array(
-							"lead_id"                                       => $lead_id,
-							"group_list_id"                         		=> $log_group,
-							"avatar"                                        => $avatar
-						);
+				$rslt = $astDB->get("custom_{$list_id}");
 
-						$exec_go                                        = $goDB
-							->insert("go_customers", $datago);
-
-						$log_id                                         = log_action($goDB, "MODIFY", $log_user, $log_ip, "Modified the Lead ID: $lead_id", $log_group, $goDB->getLastQuery());
-					}
+				if ($astDB->count > 0) {
+					$astDB->where("lead_id", $lead_id);
+					$astDB->update("custom_{$list_id}", $cf_data);
 				} else {
-					if($is_customer == 0){
-						$exec_go                                        = $goDB
-							->where("lead_id", $lead_id)
-							->delete("go_customers");
-						$log_id                                         = log_action($goDB, "MODIFY", $log_user, $log_ip, "Modified the Lead ID: $lead_id", $log_group, $goDB->getLastQuery());
-					}
+					$cf_data["lead_id"] = $lead_id;
+					$astDB->insert("custom_{$list_id}", $cf_data);
 				}
+			}
+
+			$log_id 								= log_action($goDB, "MODIFY", $log_user, $log_ip, "Modified the Lead ID: $lead_id", $log_group, $astDB->getLastQuery());
+
+			// check if existing customer
+			$goDB->where("lead_id", $lead_id);
+			$goDB->getOne("go_customers", "lead_id");
+
+			if ($goDB->count < 1) {
+				if ($is_customer > 0) {
+					// $datago                                         = array(
+					// 	"lead_id"                                       => $lead_id,
+					// 	"group_list_id"                         		=> $log_group,
+					// 	"avatar"                                        => $avatar
+					// );			
+					$datago                                         = array(
+						"lead_id"                                       => $lead_id,
+						"group_list_id"                         		=> 0,
+						"avatar"                                        => $avatar
+					);
+
+					$exec_go                                        = $goDB
+						->insert("go_customers", $datago);
+
+					$log_id                                         = log_action($goDB, "MODIFY", $log_user, $log_ip, "Modified the Lead ID: $lead_id", $log_group, $goDB->getLastQuery());
+				}
+			} else {
+				if ($is_customer == 0) {
+					$exec_go                                        = $goDB
+						->where("lead_id", $lead_id)
+						->delete("go_customers");
+					$log_id                                         = log_action($goDB, "MODIFY", $log_user, $log_ip, "Modified the Lead ID: $lead_id", $log_group, $goDB->getLastQuery());
+				}
+			}
 
 			$apiresults                                             = array(
 				"result"                                                        => "success",
 			);
-
-			} else {
-				$err_msg 								= error_handle("41004", "lead_id. Doesn't exist");
-				$apiresults 							= array(
-					"code" 									=> "41004", 
-					"result" 								=> $err_msg
-				);
-			}
 		} else {
-			$err_msg 									= error_handle("10001");
-			$apiresults 								= array(
-				"code" 										=> "10001", 
-				"result" 									=> $err_msg
-			);		
+			$err_msg 								= error_handle("41004", "lead_id. Doesn't exist");
+			$apiresults 							= array(
+				"code" 									=> "41004",
+				"result" 								=> $err_msg
+			);
 		}
+	} else {
+		$err_msg 									= error_handle("10001");
+		$apiresults 								= array(
+			"code" 										=> "10001",
+			"result" 									=> $err_msg
+		);
 	}
-	
-?>
+}

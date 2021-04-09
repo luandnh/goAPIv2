@@ -528,9 +528,8 @@
 				unset($fetch_CF);
 		    }
 		}
-
-		$data_row = implode(',', $row);
-		$csv_row .= $data_row . "\n";
+		
+		$csv_row[] = $row;
 	}
 	//$apiresults = array ( $csv_row);
 
@@ -547,5 +546,3 @@
 		"rows" 	=> $csv_row,
 		"query" => $query
 	);
-?>
-
