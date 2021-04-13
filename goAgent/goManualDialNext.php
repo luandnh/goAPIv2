@@ -998,7 +998,9 @@ if ($sipIsLoggedIn) {
             ##### grab the data from vicidial_list for the lead_id
             //$stmt="SELECT lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner,entry_list_id FROM vicidial_list where lead_id='$lead_id' LIMIT 1;";
             $astDB->where('lead_id', $lead_id);
-            $rslt = $astDB->getOne('vicidial_list', 'lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner,entry_list_id');
+            //EASYCREDIT
+            $rslt = $astDB->getOne('vicidial_list', 'lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner,entry_list_id,partner_code,identity_number,identity_issued_on,identity_issued_by,request_id');
+            //EASYCREDIT
             $list_lead_ct = $astDB->getRowCount();
             if ($list_lead_ct > 0) {
                 $row = $rslt;
@@ -1036,6 +1038,13 @@ if ($sipIsLoggedIn) {
                 $rank			= trim("{$row['rank']}");
                 $owner			= trim("{$row['owner']}");
                 $entry_list_id	= trim("{$row['entry_list_id']}");
+                //EASYCREDIT
+                $partner_code    = trim("{$row['partner_code']}");
+                $request_id    = trim("{$row['request_id']}");
+                $identity_number = trim("{$row['identity_number']}");
+                $identity_issued_on = trim("{$row['identity_issued_on']}");
+                $identity_issued_by = trim("{$row['identity_issued_by']}");
+                //EASYCREDIT
                 if ($entry_list_id < 100) {$entry_list_id = $list_id;}
             }
             if ($system_settings->qc_features_active > 0) {
@@ -1695,7 +1704,9 @@ if ($sipIsLoggedIn) {
                 $custom_field_values = '----------';
                 $custom_field_types = '|';
                 ### find the names of all custom fields, if any
-                $stmt = "SELECT field_label,field_type FROM vicidial_lists_fields where list_id='$entry_list_id' and field_type NOT IN('SCRIPT','DISPLAY') and field_label NOT IN('vendor_lead_code','source_id','list_id','gmt_offset_now','called_since_last_reset','phone_code','phone_number','title','first_name','middle_initial','last_name','address1','address2','address3','city','state','province','postal_code','country_code','gender','date_of_birth','alt_phone','email','security_phrase','comments','called_count','last_local_call_time','rank','owner');";
+                //EASYCREDIT
+                $stmt = "SELECT field_label,field_type FROM vicidial_lists_fields where list_id='$entry_list_id' and field_type NOT IN('SCRIPT','DISPLAY') and field_label NOT IN('vendor_lead_code','source_id','list_id','gmt_offset_now','called_since_last_reset','phone_code','phone_number','title','first_name','middle_initial','last_name','address1','address2','address3','city','state','province','postal_code','country_code','gender','date_of_birth','alt_phone','email','security_phrase','comments','called_count','last_local_call_time','rank','owner','partner_code','request_id');";
+                //EASYCREDIT
                 $rslt = $astDB->rawQuery($stmt);
                 $cffn_ct = $astDB->getRowCount();
                 $d = 0;
@@ -1801,7 +1812,14 @@ if ($sipIsLoggedIn) {
                 'ACcount' => $ACcount,
                 'ACcomments' => $ACcomments,
                 'call_notes' => $call_notes,
-                'CBcommentsALL' => $CBcommentsALL
+                'CBcommentsALL' => $CBcommentsALL,
+                //EASYCREDIT
+                'partner_code' => $partner_code,
+                'request_id' => $request_id,
+                'identity_number' => $identity_number,
+                'identity_issued_on' => $identity_issued_on,
+                'identity_issued_by' => $identity_issued_by,
+                //EASYCREDIT
             );
     
             $APIResult = array( "result" => "success", "data" => $LeaD_InfO );
