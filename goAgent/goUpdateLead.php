@@ -80,8 +80,8 @@ if (isset($_GET['goIdentityIssuedOn'])) { $identity_issued_on = $astDB->escape($
     else if (isset($_POST['goIdentityIssuedOn'])) { $identity_issued_on = $astDB->escape($_POST['goIdentityIssuedOn']); }
 if (isset($_GET['goIdentityIssuedBy'])) { $identity_issued_by = $astDB->escape($_GET['goIdentityIssuedBy']); }
     else if (isset($_POST['goIdentityIssuedBy'])) { $identity_issued_by = $astDB->escape($_POST['goIdentityIssuedBy']); }
-if (isset($_GET['goPartnerCode'])) { $identity_issued_by = $astDB->escape($_GET['goPartnerCode']); }
-    else if (isset($_POST['goPartnerCode'])) { $identity_issued_by = $astDB->escape($_POST['goPartnerCode']); }
+if (isset($_GET['goPartnerCode'])) { $partner_code = $astDB->escape($_GET['goPartnerCode']); }
+    else if (isset($_POST['goPartnerCode'])) { $partner_code = $astDB->escape($_POST['goPartnerCode']); }
 if (isset($_GET['goRequestId'])) { $request_id = $astDB->escape($_GET['goRequestId']); }
     else if (isset($_POST['goRequestId'])) { $request_id = $astDB->escape($_POST['goRequestId']); }
 
@@ -174,7 +174,7 @@ if ($is_logged_in) {
 				'identity_issued_on' => $identity_issued_on,
 				'identity_issued_by' => $identity_issued_by,
 				'partner_code' => $partner_code,
-				'partner_code' => $request_id,
+				'request_id' => $request_id,
             );
 			if ($DO_NOT_UPDATEphone < 1) {
                 $phoneSQL = array(
