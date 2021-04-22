@@ -72,7 +72,7 @@ if (empty($goUser) || is_null($goUser)) {
 				if ($userlevel > 8) {
 					$astDB->where("vl.user_group", $log_group);
 				} else {
-					$stringv = go_getall_allowed_users($log_group);
+					$stringv = go_getall_allowed_users_with_sub($log_group);
 					$astDB->where("rl.user in ( $stringv )");
 				}
 			}
