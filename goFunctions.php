@@ -160,6 +160,45 @@
     }
     
     
+    function go_getall_allowed_users_with_sub($groupId) {
+        include("goDBasterisk.php");
+		$allowed_users = "";
+		$allowed_groups = "";
+        $user_groups[] = $groupId;
+        if ($groupId=='ADMIN' || $groupId=='admin') {
+                   $query = "select user as userg from vicidial_users";
+                   //$rsltv = mysqli_query($link,$query);
+
+		   $result = $astDB->rawQuery($query);
+        } else {
+            $query = "select * from vicidial_sub_user_groups where user_group ='$groupId'";
+		    $result = $astDB->rawQuery($query);
+        }
+
+        if($astDB->count > 0){
+            foreach($result as $fresults){
+                    $user_groups[] = $fresults['sub_user_group'];
+            }
+        }
+        if(!empty($user_groups)){
+            $imploded_gr = implode("','", $user_groups);
+            $allowed_groups = "'".$imploded_gr."'";
+        }
+
+        $query = "select user as userg from vicidial_users where user_group in($allowed_groups)";
+        $result = $astDB->rawQuery($query);
+        if($astDB->count > 0){
+            foreach($result as $fresults){
+                    $users[] = $fresults['userg'];
+            }
+            if(!empty($users)){
+                $imploded = implode("','", $users);
+                $allowed_users = "'".$imploded."'";
+            }
+        }
+        return $allowed_users;
+    }
+    
     function go_total_agents_callv($groupId) {
         include("goDBasterisk.php");
         if (!checkIfTenant($groupId)) { 
