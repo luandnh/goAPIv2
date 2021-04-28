@@ -62,6 +62,7 @@ if (empty($goUser) || is_null($goUser)) {
                 }
             }
             $astDB->join('vicidial_sub_user_groups as vsug', 'vsug.user_group = vug.user_group', "LEFT");
+
             $group_type                             = "Default";
         }
 
