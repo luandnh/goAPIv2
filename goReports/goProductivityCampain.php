@@ -57,14 +57,24 @@
 	    // set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 	    // every time we need to filter out requests
 	    $tenant 									=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
-
+		$SELECTQuery = $astDB->rawQuery("Select sub_user_group from vicidial_sub_user_groups where user_group='".$log_group."'");
+		foreach($SELECTQuery as $user_group){
+			$user_groups[] = $user_group["sub_user_group"];
+		}
+		array_push($user_groups,$log_group);
+		$user_group_string = implode("','",$user_groups);
+		$bonus_sql = "";
 	    if ($tenant) {
-	            $astDB->where("user_group", $log_group);
+	            // $astDB->where("user_group", $log_group);
+				$astDB->where("vl.user_group", $user_groups,"IN");
+				$bonus_sql = "AND vl.user_group IN('".$user_group_string."') ";
 	    } else {
             if (strtoupper($log_group) != 'ADMIN') {
-                if ($user_level > 8) {
-                    $astDB->where("user_group", $log_group);
-                }
+                // if ($user_level > 8) {
+                //     $astDB->where("user_group", $log_group);
+                // }
+				$bonus_sql = "AND vl.user_group IN('".$user_group_string."') ";
+				$astDB->where("vl.user_group", $user_groups,"IN");
             }
 	    }
 
@@ -103,7 +113,7 @@
 		FROM vicidial_log as vl
 		JOIN vicidial_list as vli on vli.lead_id = vl.lead_id
 		RIGHT JOIN vicidial_campaigns as vc ON vl.campaign_id = vc.campaign_id
-		WHERE ".$campaign_sql." vl.call_date BETWEEN '$fromDate' AND '$toDate'
+		WHERE ".$campaign_sql." vl.call_date BETWEEN '$fromDate' AND '$toDate'  ".$bonus_sql."
 		GROUP BY vl.campaign_id";
 		$query 										= $astDB->rawQuery($agent_report_query);
 		$TOPsorted_output 							= "";
