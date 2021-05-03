@@ -90,8 +90,13 @@
 		if ($campaignID != "" && $campaignID != "ALL"){
 			$campaign_sql = " vl.campaign_id ='".$campaignID."' AND";
 		}
-		$agent_report_query= "SELECT vug.user_group, sum(vl.length_in_sec) as total_talk, COUNT(vl.phone_number) as total_call
-		FROM vicidial_user_groups vug left JOIN vicidial_log vl ON vug.user_group = vl.user_group 
+		$agent_report_query= "SELECT vug.user_group, sum(IF(vl.length_in_sec>=0, vl.length_in_sec, 0)) as total_talk, COUNT(vl.phone_number) as total_call,
+		(SELECT Count(vli.lead_id) FROM vicidial_list as vli LEFT JOIN vicidial_users vu ON  vu.user = vli.user WHERE vli.app_status = 'NE' AND vu.user_group = vug.user_group ) as not_eligable,
+		(SELECT Count(vli.lead_id) FROM vicidial_list as vli LEFT JOIN vicidial_users vu ON  vu.user = vli.user WHERE vli.app_status = 'NI' AND vu.user_group = vug.user_group ) as not_interested,
+		(SELECT Count(vli.lead_id) FROM vicidial_list as vli LEFT JOIN vicidial_users vu ON  vu.user = vli.user WHERE vli.app_status = 'AC' AND vu.user_group = vug.user_group ) as app_created,
+		(SELECT Count(vli.lead_id) FROM vicidial_list as vli LEFT JOIN vicidial_users vu ON  vu.user = vli.user WHERE vli.app_status = 'AP' AND vu.user_group = vug.user_group ) as app_approved,
+		(SELECT Count(vli.lead_id) FROM vicidial_list as vli LEFT JOIN vicidial_users vu ON  vu.user = vli.user WHERE vli.STATUS != 'NEW' AND vu.user_group = vug.user_group ) as total_contacted
+		FROM vicidial_user_groups vug left JOIN vicidial_log vl ON vug.user_group = vl.user_group
 		WHERE ".$campaign_sql." vl.call_date BETWEEN '$fromDate' AND '$toDate' ".$bonus_sql."
 		GROUP BY vug.user_group";
 		$query 										= $astDB->rawQuery($agent_report_query);

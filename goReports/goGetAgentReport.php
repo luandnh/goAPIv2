@@ -92,7 +92,7 @@
 			$campaign_sql = " vl.campaign_id ='".$campaignID."' AND";
 		}
 		$agent_report_query= "
-		select vu.user, sum(vl.length_in_sec) as total_talk, 
+		select vu.user, sum(IF(vl.length_in_sec>=0, vl.length_in_sec, 0)) as total_talk, 
 		COUNT(vl.phone_number) as total_call, 
 		(SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.app_status = 'NE' and vu.user = vli.user) as not_eligable,
 		(SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.app_status = 'NI' and vu.user = vli.user) as not_interested,
