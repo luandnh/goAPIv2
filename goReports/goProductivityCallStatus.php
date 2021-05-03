@@ -102,7 +102,7 @@
 			COUNT(if(vdl.sip_hangup_cause in (488, 606),vdl.uniqueid, null)) as sip_erro
 			FROM vicidial_users vu
 			left JOIN vicidial_log vl ON vu.user_group = vl.user_group and vu.USER = vl.user
-			left JOIN vicidial_dial_log vdl ON vl .uniqueid = vdl .uniqueid
+			left JOIN vicidial_dial_log vdl ON vl.lead_id = vdl.lead_id
 		WHERE ".$campaign_sql." vl.call_date BETWEEN '$fromDate' AND '$toDate'  ".$bonus_sql."
 		GROUP BY vl.user_group, vl.user";
 		$query 										= $astDB->rawQuery($agent_report_query);
