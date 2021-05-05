@@ -165,16 +165,16 @@ if ($sipIsLoggedIn || $use_webrtc) {
             passthru("/usr/local/bin/sipsak -M -O desktop -B \"$SIPSAK_prefix$VD_campaign\" -r 5060 -s sip:$extension@$phone_ip > /dev/null");
             $SIqueryCID = "$SIPSAK_prefix$VD_campaign$DS$CIDdate";
 		}
-        // QUANG
+        // DEV HANGUP
         ##### Hangup the client phone
+        $server_ip = $phone_settings->server_ip;
         $astDB->where('server_ip', $server_ip);
         $astDB->where('channel', "$protocol/$extension%", 'like');
         $astDB->orderBy('channel');
-        $query = $astDB->getOne('live_sip_channels', 'channel');
+        $query = $astDB->get('live_sip_channels', null, 'channel');
         //$query = $db->query("SELECT channel FROM live_sip_channels where server_ip = '$server_ip' and channel LIKE \"$protocol/$extension%\" order by channel desc;");
-        $agent_channel = '';
-        if ($astDB->getRowCount() > 0) {
-            $agent_channel = $query['channel'];
+        foreach ($query as $row) {
+            $agent_channel = $row['channel'];
             $insertData = array(
                 'man_id' => '',
                 'uniqueid' => '',
@@ -197,7 +197,37 @@ if ($sipIsLoggedIn || $use_webrtc) {
                 'cmd_line_k' => ''
             );
             $rslt = $astDB->insert('vicidial_manager', $insertData);
-        } 
+        }
+        $astDB->where('server_ip', $server_ip);
+        $astDB->where('extension', $session_id);
+        $astDB->orderBy('channel');
+        $query = $astDB->get('live_sip_channels', null, 'channel');
+        foreach ($query as $row) {
+            $agent_channel = $row['channel'];
+            $insertData = array(
+                'man_id' => '',
+                'uniqueid' => '',
+                'entry_date' => $NOW_TIME,
+                'status' => 'NEW',
+                'response' => 'N',
+                'server_ip' => $server_ip,
+                'channel' => '',
+                'action' => 'Hangup',
+                'callerid' => "ULGH3459$StarTtimE",
+                'cmd_line_b' => "Channel: $agent_channel",
+                'cmd_line_c' => '',
+                'cmd_line_d' => '',
+                'cmd_line_e' => '',
+                'cmd_line_f' => '',
+                'cmd_line_g' => '',
+                'cmd_line_h' => '',
+                'cmd_line_i' => '',
+                'cmd_line_j' => '',
+                'cmd_line_k' => ''
+            );
+
+            $rslt = $astDB->insert('vicidial_manager', $insertData);
+        }
 
         // 
         $TEMP_SIP_user_DiaL = $SIP_user_DiaL;
