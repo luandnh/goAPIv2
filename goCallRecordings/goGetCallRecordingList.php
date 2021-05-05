@@ -174,6 +174,7 @@ if (empty($goUser) || is_null($goUser)) {
 				$dataLocation[] 				= $location;
 				$dataRecordingID[] 				= $fresults['recording_id'];
 				$dataB64encoded[]				= $fresults['b64encoded'];
+				$fresults["location"] = $location;
 				array_push($data, $fresults);
 			}
 

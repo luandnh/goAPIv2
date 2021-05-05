@@ -52,14 +52,27 @@
 			$tenant										= (checkIfTenant($log_group, $goDB)) ? 1 : 0;
 			
 			if ($tenant) {
-				$astDB->where("user_group", $log_group);
-				$astDB->orWhere("user_group", "---ALL---");
+				$astDB->where("vl.user_group", $log_group);
+				$astDB->orWhere("vl.user_group", "---ALL---");
 			} else {
 				if (strtoupper($log_group) != 'ADMIN') {
-					if ($userlevel > 8) {
-						$astDB->where("user_group", $log_group);
-						$astDB->orWhere("user_group", "---ALL---");
-					}
+					// if ($userlevel > 8) {
+						$astDB->where("vug.user_group", $log_group);
+						$astDB->join('vicidial_sub_user_groups as vsug', 'vsug.user_group = vug.user_group', "LEFT");
+						$group_type                             = "Default";
+						$cols_gr                                        = array(
+							"GROUP_CONCAT(vsug.sub_user_group) as sub_user_groups"
+						);
+						$astDB->groupBy("vug.user_group");
+						$user_groups                                     = $astDB->get("vicidial_user_groups vug", NULL, $cols_gr);
+						$cols_gr = array();
+						if (!isset($user_groups[0]["sub_user_groups"]) || $user_groups[0]["sub_user_groups"] !="")
+						{
+							$temp = explode(",",$user_groups[0]["sub_user_groups"]);
+							$cols_gr = explode(",",$user_groups[0]["sub_user_groups"]);
+						} 
+						array_push($cols_gr, $log_group);
+						$astDB->where("vl.user_group", $cols_gr,"IN");
 				}					
 			}
 			

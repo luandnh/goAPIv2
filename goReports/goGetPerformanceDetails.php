@@ -83,12 +83,18 @@
 				}			
 			}
 				
+                        $SELECTQuery = $astDB->rawQuery("Select sub_user_group from vicidial_sub_user_groups where user_group='".$usergroup."'");
+                        foreach($SELECTQuery as $user_group_e){
+                                $user_groups[] = $user_group_e["sub_user_group"];
+                        }
+                        array_push($user_groups,$usergroup);
 			if ($tenant) {
-				$astDB->where("user_group", $usergroup);
+                                $astDB->where("user_group", $user_groups,"IN");
 			} else {
 				if (strtoupper($usergroup) != 'ADMIN') {
 					if ($userlevel < 9) {
-						$astDB->where("user_group", $usergroup);
+					// 	$astDB->where("user_group", $usergroup);
+                                        $astDB->where("user_group", $user_groups,"IN");
 					}
 				}					
 			}

@@ -85,13 +85,22 @@
 						//die('MySQL connect ERROR: ' . mysqli_error('mysqli'));
 					}			
 				}
-				
+				$SELECTQuery = $astDB->rawQuery("Select sub_user_group from vicidial_sub_user_groups where user_group='".$log_group."'");
+				foreach($SELECTQuery as $user_group){
+					$user_groups[] = $user_group["sub_user_group"];
+				}
+				array_push($user_groups,$log_group);
+				$user_group_string = implode("','",$user_groups);
+				$bonus_sql = "";
 				if ($tenant) {
-					$astDB->where("user_group", $log_group);
+					// $astDB->where("user_group", $log_group);
+					$astDB->where("user_group", $user_groups,"IN");
+					$bonus_sql = "AND vl.user_group IN('".$user_group_string."') ";
 				} else {
 					if (strtoupper($log_group) != 'ADMIN') {
 						if ($userlevel < 9) {
-							$astDB->where("user_group", $log_group);
+						$astDB->where("vl.user_group", $user_groups,"IN");
+						$bonus_sql = "AND vl.user_group IN('".$user_group_string."') ";
 						}
 					}					
 				}
@@ -197,32 +206,6 @@
 						}
 					}					
 				}
-				
-				/*$cols = array(
-					"vu.full_name",
-					"val.user",
-					"sum(wait_sec) as wait_sec",
-					"sum(talk_sec) as talk_sec",
-					"sum(dispo_sec) as dispo_sec",
-					"sum(pause_sec) as pause_sec_tot",
-					"count(lead_id) as calls",
-					"status",
-					"sum(dead_sec) as dead_sec",
-					"(sum(talk_sec) - sum(dead_sec)) as customer"
-				);
-				
-				$agenttd = $astDB
-					->join("vicidial_users vu", "val.user = vu.user", "LEFT")
-					->where("date_format(event_time, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
-					->where("campaign_id", $array_camp, "IN")
-					//->where("pause_sec", array(0, 65000), "BETWEEN")
-					->where("status", array('NULL', 'LAGGED'), "NOT IN")
-					->groupBy("val.user")
-					->get("vicidial_agent_log val", $limit, $cols);
-				$query_td = $astDB->getLastQuery();		
-				$usercount = $astDB->getRowCount();
-				*/
-
 				$cols = array(
 				      "vu.full_name",
 			              "val.user",

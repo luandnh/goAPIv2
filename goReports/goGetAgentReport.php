@@ -48,23 +48,25 @@
 	    $toDate 									= date("Y-m-d") . " 23:59:59";
     	//die($fromDate." - ".$toDate);                                                                 => $err_msg
     } else {
+	    // set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
+	    // every time we need to filter out requests
+	    $tenant 									=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
 		$SELECTQuery = $astDB->rawQuery("Select sub_user_group from vicidial_sub_user_groups where user_group='".$log_group."'");
 		foreach($SELECTQuery as $user_group){
 			$user_groups[] = $user_group["sub_user_group"];
 		}
 		array_push($user_groups,$log_group);
 		$user_group_string = implode("','",$user_groups);
-	    // set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
-	    // every time we need to filter out requests
-	    $tenant 									=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
-
+		$bonus_sql = "";
 	    if ($tenant) {
-	            $astDB->where("user_group", $log_group);
+			$astDB->where("vl.user_group", $user_groups,"IN");
+			$bonus_sql = "AND vl.user_group IN('".$user_group_string."') ";
 	    } else {
             if (strtoupper($log_group) != 'ADMIN') {
-                if ($user_level > 8) {
-                    $astDB->where("user_group", $log_group);
-                }
+                // if ($user_level > 8) {
+			$astDB->where("vl.user_group", $user_groups,"IN");
+			$bonus_sql = "AND vl.user_group IN('".$user_group_string."') ";
+                // }
             }
 	    }
 
@@ -90,14 +92,14 @@
 			$campaign_sql = " vl.campaign_id ='".$campaignID."' AND";
 		}
 		$agent_report_query= "
-		select vu.user, sum(vl.length_in_sec) as total_talk, 
+		select vu.user, sum(IF(vl.length_in_sec>=0, vl.length_in_sec, 0)) as total_talk, 
 		COUNT(vl.phone_number) as total_call, 
 		(SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.app_status = 'NE' and vu.user = vli.user) as not_eligable,
 		(SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.app_status = 'NI' and vu.user = vli.user) as not_interested,
 		(SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.app_status = 'AC' and vu.user = vli.user) as app_created,
 		(SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.app_status = 'AP' and vu.user = vli.user) as app_approved,
 		(SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.STATUS != 'NEW' and vu.user = vli.user) as total_contacted 
-		From vicidial_users as vu left join vicidial_log vl on vu.user = vl.user WHERE ".$campaign_sql." vl.call_date BETWEEN '$fromDate' AND '$toDate' group by vu.user";
+		From vicidial_users as vu left join vicidial_log vl on vu.user = vl.user WHERE ".$campaign_sql." vl.call_date BETWEEN '$fromDate' AND '$toDate'  ".$bonus_sql." group by vu.user";
 		// $agent_report_query= "
 		// Select vu.user, sum(vl.length_in_sec) as total_talk, COUNT(vl.phone_number) as total_call, 
 		// (SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.STATUS != 'NEW' and vu.user = vli.user)as total_call3 

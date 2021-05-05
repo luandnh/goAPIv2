@@ -54,17 +54,18 @@
 		}
 		array_push($user_groups,$log_group);
 		$user_group_string = implode("','",$user_groups);
+		$bonus_sql = "";
 	    // set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 	    // every time we need to filter out requests
 	    $tenant 									=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
 
 	    if ($tenant) {
-	            $astDB->where("user_group", $log_group);
+			$astDB->where("vl.user_group", $user_groups,"IN");
+			$bonus_sql = "AND vl.user_group IN('".$user_group_string."') ";
 	    } else {
             if (strtoupper($log_group) != 'ADMIN') {
-                if ($user_level > 8) {
-                    $astDB->where("user_group", $log_group);
-                }
+				$astDB->where("vl.user_group", $user_groups,"IN");
+				$bonus_sql = "AND vl.user_group IN('".$user_group_string."') ";
             }
 	    }
 
@@ -101,8 +102,8 @@
 			COUNT(if(vdl.sip_hangup_cause in (488, 606),vdl.uniqueid, null)) as sip_erro
 			FROM vicidial_users vu
 			left JOIN vicidial_log vl ON vu.user_group = vl.user_group and vu.USER = vl.user
-			left JOIN vicidial_dial_log vdl ON vl .uniqueid = vdl .uniqueid
-		WHERE ".$campaign_sql." vl.call_date BETWEEN '$fromDate' AND '$toDate'
+			left JOIN vicidial_dial_log vdl ON vl.lead_id = vdl.lead_id
+		WHERE ".$campaign_sql." vl.call_date BETWEEN '$fromDate' AND '$toDate'  ".$bonus_sql."
 		GROUP BY vl.user_group, vl.user";
 		$query 										= $astDB->rawQuery($agent_report_query);
 		$TOPsorted_output 							= "";

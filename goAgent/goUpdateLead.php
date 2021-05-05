@@ -74,6 +74,12 @@ if (isset($_GET['goEmail'])) { $email = $astDB->escape($_GET['goEmail']); }
 if (isset($_GET['goSecurity'])) { $security_phrase = $astDB->escape($_GET['goSecurity']); }
     else if (isset($_POST['goSecurity'])) { $security_phrase = $astDB->escape($_POST['goSecurity']); }
 
+if (isset($_GET['goIdentityNumber'])) { $identity_number = $astDB->escape($_GET['goIdentityNumber']); }
+    else if (isset($_POST['goIdentityNumber'])) { $identity_number = $astDB->escape($_POST['goIdentityNumber']); }
+if (isset($_GET['goIdentityIssuedOn'])) { $identity_issued_on = $astDB->escape($_GET['goIdentityIssuedOn']); }
+    else if (isset($_POST['goIdentityIssuedOn'])) { $identity_issued_on = $astDB->escape($_POST['goIdentityIssuedOn']); }
+if (isset($_GET['goIdentityIssuedBy'])) { $identity_issued_by = $astDB->escape($_GET['goIdentityIssuedBy']); }
+    else if (isset($_POST['goIdentityIssuedBy'])) { $identity_issued_by = $astDB->escape($_POST['goIdentityIssuedBy']); }
 if (isset($_GET['goCustomFields'])) { $custom_fields = $astDB->escape($_GET['goCustomFields']); }
     else if (isset($_POST['goCustomFields'])) { $custom_fields = $astDB->escape($_POST['goCustomFields']); }
 
@@ -157,7 +163,11 @@ if ($is_logged_in) {
                 'alt_phone' => $alt_phone,
                 'email' => $email,
                 'security_phrase' => $security_phrase,
-                'comments' => $comments
+                'comments' => $comments,
+				//EASYCREDIT
+				'identity_number' => $identity_number,
+				'identity_issued_on' => $identity_issued_on,
+				'identity_issued_by' => $identity_issued_by,
             );
 			if ($DO_NOT_UPDATEphone < 1) {
                 $phoneSQL = array(
