@@ -90,22 +90,27 @@
 		if ($campaignID != "" && $campaignID != "ALL"){
 			$campaign_sql = " vl.campaign_id ='".$campaignID."' AND";
 		}
+		$rp_sql = "";
+		if (isset($fromDate) && isset($toDate)){
+			$rp_sql = "  AND vdl.call_date BETWEEN '$fromDate' AND '$toDate' ";
+		}
 		$agent_report_query= "
 		SELECT DISTINCT vl.user_group, vl.user,
-			COUNT(vl.phone_number) as total_call,
-			COUNT(if(vdl.sip_hangup_cause = 200,vdl.uniqueid, null)) as answer,
-			COUNT(if(vdl.sip_hangup_cause in(480,483),vdl.uniqueid, null)) as noanswer,
-			COUNT(if(vdl.sip_hangup_cause > 500,vdl.uniqueid, null)) as congestion,
-			COUNT(if(vdl.sip_hangup_cause in(486, 600),vdl.uniqueid, null)) as busy,
-			COUNT(if(vdl.sip_hangup_cause in (401, 403, 407),vdl.uniqueid, null)) as cancel,
-			COUNT(if(vdl.sip_hangup_cause = 603,vdl.uniqueid, null)) as denied,
-			COUNT(if(vdl.sip_hangup_cause in (488, 606),vdl.uniqueid, null)) as sip_erro
+			COUNT(if(1 $rp_sql,vl.phone_number,null)) as total_call,
+			COUNT(if(vdl.sip_hangup_cause = 200 $rp_sql,vdl.uniqueid, null)) as answer,
+			COUNT(if(vdl.sip_hangup_cause in(480,483) $rp_sql,vdl.uniqueid, null)) as noanswer,
+			COUNT(if(vdl.sip_hangup_cause > 500 $rp_sql,vdl.uniqueid, null)) as congestion,
+			COUNT(if(vdl.sip_hangup_cause in(486, 600) $rp_sql,vdl.uniqueid, null)) as busy,
+			COUNT(if(vdl.sip_hangup_cause in (401, 403, 407) $rp_sql,vdl.uniqueid, null)) as cancel,
+			COUNT(if(vdl.sip_hangup_cause = 603 $rp_sql,vdl.uniqueid, null)) as denied,
+			COUNT(if(vdl.sip_hangup_cause in (488, 606) $rp_sql,vdl.uniqueid, null)) as sip_erro
 			FROM vicidial_users vu
 			left JOIN vicidial_log vl ON vu.user_group = vl.user_group and vu.USER = vl.user
 			left JOIN vicidial_dial_log vdl ON vl.lead_id = vdl.lead_id
-		WHERE ".$campaign_sql." vl.call_date BETWEEN '$fromDate' AND '$toDate'  ".$bonus_sql."
+		WHERE ".$campaign_sql." vl.call_date BETWEEN '$fromDate' AND '$toDate'  ".$bonus_sql." AND vdl.sip_hangup_cause not in (100, 0, 183)
 		GROUP BY vl.user_group, vl.user";
 		$query 										= $astDB->rawQuery($agent_report_query);
+        // file_put_contents("QUANGBUG.log", $agent_report_query, FILE_APPEND | LOCK_EX);
 		$TOPsorted_output 							= "";
 		$number 									= 1;
 		foreach ($query as $row) {
