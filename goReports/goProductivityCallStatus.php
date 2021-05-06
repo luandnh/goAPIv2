@@ -110,7 +110,7 @@
 		WHERE ".$campaign_sql." vl.call_date BETWEEN '$fromDate' AND '$toDate'  ".$bonus_sql." AND vdl.sip_hangup_cause not in (100, 0, 183)
 		GROUP BY vl.user_group, vl.user";
 		$query 										= $astDB->rawQuery($agent_report_query);
-        // file_put_contents("QUANGBUG.log", $agent_report_query, FILE_APPEND | LOCK_EX);
+        file_put_contents("QUANGBUG.log", $agent_report_query, FILE_APPEND | LOCK_EX);
 		$TOPsorted_output 							= "";
 		$number 									= 1;
 		foreach ($query as $row) {

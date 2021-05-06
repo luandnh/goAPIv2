@@ -95,20 +95,22 @@
 		if (isset($fromDate) && isset($toDate)){
 			$rp_sql = " AND vli.modify_date BETWEEN '$fromDate' AND '$toDate' ";
 		}
+        file_put_contents("QUANGBUG.log", $rp_sql, FILE_APPEND | LOCK_EX);
 		$agent_report_query= "
 		select vu.user, sum(IF(vl.length_in_sec>=0, vl.length_in_sec, 0)) as total_talk, 
 		COUNT(vl.phone_number) as total_call, 
-		(SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.app_status = 'NE' and vu.user = vli.user $rp_sql) as not_eligable,
-		(SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.app_status = 'NI' and vu.user = vli.user $rp_sql) as not_interested,
-		(SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.app_status = 'AC' and vu.user = vli.user $rp_sql) as app_created,
-		(SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.app_status = 'AP' and vu.user = vli.user $rp_sql) as app_approved,
-		(SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.STATUS != 'NEW' and vu.user = vli.user $rp_sql) as total_contacted 
+		(SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.list_id = vl.list_id and  vli.app_status = 'NE' and vu.user = vli.user $rp_sql) as not_eligable,
+		(SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.list_id = vl.list_id and  vli.app_status = 'NI' and vu.user = vli.user $rp_sql) as not_interested,
+		(SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.list_id = vl.list_id and  vli.app_status = 'AC' and vu.user = vli.user $rp_sql) as app_created,
+		(SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.list_id = vl.list_id and  vli.app_status = 'AP' and vu.user = vli.user $rp_sql) as app_approved,
+		(SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.list_id = vl.list_id and vli.STATUS != 'NEW' and vu.user = vli.user $rp_sql) as total_contacted 
 		From vicidial_users as vu left join vicidial_log vl on vu.user = vl.user WHERE ".$campaign_sql." vl.call_date BETWEEN '$fromDate' AND '$toDate'  ".$bonus_sql." group by vu.user";
 		// $agent_report_query= "
 		// Select vu.user, sum(vl.length_in_sec) as total_talk, COUNT(vl.phone_number) as total_call, 
 		// (SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.STATUS != 'NEW' and vu.user = vli.user)as total_call3 
 		// From vicidial_users as vu left join vicidial_log vl on vu.user = vl.user WHERE vl.call_date BETWEEN '$fromDate' AND '$toDate' group by vu.user";
 		$query 										= $astDB->rawQuery($agent_report_query);
+		
 		$TOPsorted_output 							= "";
 		$number 									= 1;
 		foreach ($query as $row) {
