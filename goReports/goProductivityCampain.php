@@ -115,6 +115,7 @@
 		RIGHT JOIN vicidial_campaigns as vc ON vl.campaign_id = vc.campaign_id
 		WHERE ".$campaign_sql." vl.call_date BETWEEN '$fromDate' AND '$toDate'  ".$bonus_sql."
 		GROUP BY vl.campaign_id";
+        // file_put_contents("QUANGBUG.log", $agent_report_query, FILE_APPEND | LOCK_EX);
 		$query 										= $astDB->rawQuery($agent_report_query);
 		$TOPsorted_output 							= "";
 		$number 									= 1;

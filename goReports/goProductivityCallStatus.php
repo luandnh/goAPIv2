@@ -98,19 +98,22 @@
 		SELECT DISTINCT vl.user_group, vl.user,
 			COUNT(if(1 $rp_sql,vl.phone_number,null)) as total_call,
 			COUNT(if(vdl.sip_hangup_cause = 200 $rp_sql,vdl.uniqueid, null)) as answer,
-			COUNT(if(vdl.sip_hangup_cause in(480,483) $rp_sql,vdl.uniqueid, null)) as noanswer,
-			COUNT(if(vdl.sip_hangup_cause > 500 $rp_sql,vdl.uniqueid, null)) as congestion,
-			COUNT(if(vdl.sip_hangup_cause in(486, 600) $rp_sql,vdl.uniqueid, null)) as busy,
+			COUNT(if(vdl.sip_hangup_cause in(183) $rp_sql,vdl.uniqueid, null)) as noanswer,
+			COUNT(if(vdl.sip_hangup_cause > 1500 $rp_sql,vdl.uniqueid, null)) as congestion,
+			COUNT(if(vdl.sip_hangup_cause in(486,480) $rp_sql,vdl.uniqueid, null)) as busy,
 			COUNT(if(vdl.sip_hangup_cause in (401, 403, 407) $rp_sql,vdl.uniqueid, null)) as cancel,
 			COUNT(if(vdl.sip_hangup_cause = 603 $rp_sql,vdl.uniqueid, null)) as denied,
-			COUNT(if(vdl.sip_hangup_cause in (488, 606) $rp_sql,vdl.uniqueid, null)) as sip_erro
+			COUNT(if(vdl.sip_hangup_cause in (503) $rp_sql,vdl.uniqueid, null)) as sip_erro,
+			COUNT(if(vdl.sip_hangup_cause not in (0,200, 183,486,480,401,403,407,503,603) $rp_sql,vdl.uniqueid, null)) as unknown
 			FROM vicidial_users vu
-			left JOIN vicidial_log vl ON vu.user_group = vl.user_group and vu.USER = vl.user
+			left JOIN vicidial_log vl ON (vu.user_group = vl.user_group or vl.user IN ('VDAD'))  and vu.USER = vl.user
 			left JOIN vicidial_dial_log vdl ON vl.lead_id = vdl.lead_id
-		WHERE ".$campaign_sql." vl.call_date BETWEEN '$fromDate' AND '$toDate'  ".$bonus_sql." AND vdl.sip_hangup_cause not in (100, 0, 183)
+		WHERE ".$campaign_sql." vl.call_date BETWEEN '$fromDate' AND '$toDate' or ( vl.user IN ('VDAD') and vl.list_id not in(998))  ".$bonus_sql."
 		GROUP BY vl.user_group, vl.user";
+		
+		//  AND vdl.sip_hangup_cause not in (100)
 		$query 										= $astDB->rawQuery($agent_report_query);
-        file_put_contents("QUANGBUG.log", $agent_report_query, FILE_APPEND | LOCK_EX);
+        // file_put_contents("QUANGBUG.log", $agent_report_query, FILE_APPEND | LOCK_EX);
 		$TOPsorted_output 							= "";
 		$number 									= 1;
 		foreach ($query as $row) {
@@ -122,9 +125,10 @@
 			$TOPsorted_output[] 					.= '<td nowrap>'.$row['noanswer'].'</td>';
 			$TOPsorted_output[] 					.= '<td nowrap>'.$row['congestion'].'</td>';
 			$TOPsorted_output[] 					.= '<td nowrap>'.$row['busy'].'</td>';
+			$TOPsorted_output[] 					.= '<td nowrap>'.$row['cancel'].'</td>';
 			$TOPsorted_output[] 					.= '<td nowrap>'.$row['denied'].'</td>';
 			$TOPsorted_output[] 					.= '<td nowrap>'.$row['sip_erro'].'</td>';
-			$TOPsorted_output[] 					.= '<td nowrap>'.$row['cancel'].'</td>';
+			$TOPsorted_output[] 					.= '<td nowrap>'.$row['unknown'].'</td>';
 			$TOPsorted_output[] 					.= '<td nowrap>'.'0'.'</td>';
 			$TOPsorted_output[] 					.= '<td nowrap>'.'0'.'</td>';
 			$TOPsorted_output[] 					.= '</tr>';
