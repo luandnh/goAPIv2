@@ -103,7 +103,7 @@
 		FROM vicidial_user_groups vug left JOIN vicidial_log vl ON vug.user_group = vl.user_group
 		WHERE ".$campaign_sql." vl.call_date BETWEEN '$fromDate' AND '$toDate' ".$bonus_sql."
 		GROUP BY vug.user_group";
-        file_put_contents("QUANGBUG.log", $agent_report_query, FILE_APPEND | LOCK_EX);
+        // file_put_contents("QUANGBUG.log", $agent_report_query, FILE_APPEND | LOCK_EX);
 		$query 										= $astDB->rawQuery($agent_report_query);
 		$TOPsorted_output 							= "";
 		$number 									= 1;
