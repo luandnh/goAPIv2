@@ -334,6 +334,7 @@ if (empty($log_user) || is_null($log_user)) {
 	);
 
 	$cols										= "
+			user_id,
 			user,
 			pass,
 			pass_hash,
