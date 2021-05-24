@@ -140,6 +140,7 @@ if ($is_logged_in) {
 		//$stmt="UPDATE vicidial_list set status='$dispo_choice', user='$user' where lead_id='$lead_id';";
 		$updateData = array(
 			'status' => $dispo_choice,
+			'call_status' => $dispo_choice,
 			'user' => $user
 		);
 		$astDB->where('lead_id', $lead_id);

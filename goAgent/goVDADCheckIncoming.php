@@ -136,7 +136,7 @@ if ($is_logged_in) {
         ##### grab the data from vicidial_list for the lead_id
         //$stmt="SELECT lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner,entry_list_id FROM vicidial_list where lead_id='$lead_id' LIMIT 1;";
         $astDB->where('lead_id', $lead_id);
-        $rslt = $astDB->getOne('vicidial_list', 'lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,identity_number,identity_issued_by,app_status,identity_issued_on,vendor_lead_code,partner_code,request_id,called_count,last_local_call_time,rank,owner,entry_list_id');
+        $rslt = $astDB->getOne('vicidial_list', 'lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,identity_number,identity_issued_by,app_status,identity_issued_on,vendor_lead_code,partner_code,request_id,called_count,last_local_call_time,rank,owner,entry_list_id,call_status');
         $list_lead_ct = $astDB->getRowCount();
         
         if ($list_lead_ct > 0) {
@@ -144,7 +144,8 @@ if ($is_logged_in) {
         #	$lead_id		= trim("{$row['lead_id']}");
             $dispo			= trim("{$row['status']}");
             $tsr			= trim("{$row['user']}");
-            $app_status			= trim("{$row['app_status']}");
+            $app_status		= trim("{$row['app_status']}");
+            $call_status	= trim("{$row['call_status']}");
             $vendor_id		= trim("{$row['vendor_lead_code']}");
             $source_id		= trim("{$row['source_id']}");
             $list_id		= trim("{$row['list_id']}");
@@ -957,7 +958,8 @@ if ($is_logged_in) {
         $call_notes = (!is_null($CNotes['call_notes'])) ? $CNotes['call_notes'] : '';
 
         $LeaD_InfO = array(
-            'app_status'=>$app_status,
+            'app_status' => $app_status,
+            'call_status'=> $call_status,
             'callerid' => $callerid,
             'lead_id' => $lead_id,
             'dispo' => $dispo,

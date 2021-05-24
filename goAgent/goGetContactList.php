@@ -75,17 +75,18 @@ if (count($list_ids) > 0 ) {
         $astDB->orWhere('comments', "%$search_string%", 'like');
     }
     $astDB->join('vicidial_lists vls', 'vls.list_id=vl.list_id', 'left');
-    $astDB->join('vicidial_campaign_statuses vcs', 'vl.status=vcs.status', 'left');
-    $rslt = $astDB->get('vicidial_list vl', $limit, 'lead_id,first_name,middle_initial,last_name,phone_number,last_local_call_time,
+    $astDB->join('vicidial_campaign_statuses vcs', 'vl.call_status=vcs.status', 'left');
+    $rslt = $astDB->get('vicidial_list vl', $limit, 'DISTINCT (lead_id),first_name,middle_initial,last_name,phone_number,last_local_call_time,
     vls.campaign_id,
     CASE 
         WHEN vl.status = "INCALL" THEN "Đang trong cuộc gọi"
-        WHEN vl.status = "NEW" THEN "Mới"
+        WHEN vl.status = "NEW" and vl.call_status IS NULL THEN "Khách hàng mới"
+        WHEN vl.status IN ("NEW","B") and vl.call_status IS NOT NULL THEN (select status_name from vicidial_campaign_statuses vcs where vcs.status = vl.call_status LIMIT 1)
+        WHEN vl.status = "B" THEN "Bận"
         ELSE vcs.status_name
     END as `status_name`
     ,comments,phone_code');
     $lastQuery = $astDB->getLastQuery();
-    file_put_contents("LUANDEBUG.log",$lastQuery."\n");
     $leads = array();
     foreach ($rslt as $lead) {
         $leads[] = $lead;
