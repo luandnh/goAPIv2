@@ -27,9 +27,11 @@ $system_settings = get_settings('system', $astDB);
 
 if (isset($lead_id) && $lead_id !== '') {
     $astDB->where('lead_id', $lead_id);
+    $fetch_callnotes = $astDB->getOne("vicidial_call_notes", "call_notes");
+    $astDB->where('lead_id', $lead_id);
     $lead_info = $astDB->getOne('vicidial_list', 'lead_id,list_id,title,first_name,middle_initial,last_name,phone_number,alt_phone,email,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,status,user,comments');
     $leadIDExist = $astDB->getRowCount();
-    
+    $lead_info['call_notes'] = $fetch_callnotes["call_notes"];
     if ($system_settings->custom_fields_enabled > 0) {
         $astDB->where('lead_id', $lead_id);
         $rslt = $astDB->getOne('vicidial_list', 'list_id');

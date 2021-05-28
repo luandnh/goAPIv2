@@ -166,7 +166,6 @@ if (empty($goUser) || is_null($goUser)) {
             ->where("vu.user",$goUser)
             ->groupBy("vl.user")
             ->get("vicidial_users vu, vicidial_log vl", $limit, "vl.user, count(vl.lead_id) as calls");
-
         if($astDB->count >0){
             $total_calls = $agenttotalcalls[0]["calls"];
             $agent_user = $agenttd[0]['user'];

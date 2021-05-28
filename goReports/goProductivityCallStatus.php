@@ -87,8 +87,11 @@
 			}			
 		}
 		$campaign_sql = "";
+		$val_campaign_sql = "";
 		if ($campaignID != "" && $campaignID != "ALL"){
-			$campaign_sql = " vl.campaign_id ='".$campaignID."' AND";
+			$campaign_sql = " vl.campaign_id ='".$campaignID."' AND ";
+			
+			$val_campaign_sql = " val.campaign_id ='".$campaignID."' AND ";
 		}
 		$rp_sql = "";
 		if (isset($fromDate) && isset($toDate)){
@@ -96,15 +99,17 @@
 		}
 		$agent_report_query= "
 		SELECT DISTINCT vl.user_group, vl.user,
-			COUNT(if(1 $rp_sql,vl.phone_number,null)) as total_call,
-			COUNT(if(vdl.sip_hangup_cause = 200 $rp_sql,vdl.uniqueid, null)) as answer,
-			COUNT(if(vdl.sip_hangup_cause in(183) $rp_sql,vdl.uniqueid, null)) as noanswer,
-			COUNT(if(vdl.sip_hangup_cause > 1500 $rp_sql,vdl.uniqueid, null)) as congestion,
-			COUNT(if(vdl.sip_hangup_cause in(486,480) $rp_sql,vdl.uniqueid, null)) as busy,
-			COUNT(if(vdl.sip_hangup_cause in (401, 403, 407) $rp_sql,vdl.uniqueid, null)) as cancel,
-			COUNT(if(vdl.sip_hangup_cause = 603 $rp_sql,vdl.uniqueid, null)) as denied,
-			COUNT(if(vdl.sip_hangup_cause in (503) $rp_sql,vdl.uniqueid, null)) as sip_erro,
-			COUNT(if(vdl.sip_hangup_cause not in (0,200, 183,486,480,401,403,407,503,603) $rp_sql,vdl.uniqueid, null)) as unknown
+			(SELECT SUM(val.talk_sec) - SUM(val.dead_sec) FROM vicidial_agent_log val WHERE $val_campaign_sql val.user = vu.user AND val.event_time BETWEEN '$fromDate' AND '$toDate') as total_talk, 
+			COUNT(vl.lead_id) as total_call, 
+			COUNT(if($campaign_sql 1 $rp_sql ,vl.phone_number,null)) as total_call,
+			COUNT(if($campaign_sql vdl.sip_hangup_cause = 200 $rp_sql,vdl.uniqueid, null)) as answer,
+			COUNT(if($campaign_sql vdl.sip_hangup_cause in(183) $rp_sql,vdl.uniqueid, null)) as noanswer,
+			COUNT(if($campaign_sql vdl.sip_hangup_cause > 1500 $rp_sql,vdl.uniqueid, null)) as congestion,
+			COUNT(if($campaign_sql vdl.sip_hangup_cause in(486,480) $rp_sql,vdl.uniqueid, null)) as busy,
+			COUNT(if($campaign_sql vdl.sip_hangup_cause in (401, 403, 407) $rp_sql,vdl.uniqueid, null)) as cancel,
+			COUNT(if($campaign_sql vdl.sip_hangup_cause = 603 $rp_sql,vdl.uniqueid, null)) as denied,
+			COUNT(if($campaign_sql vdl.sip_hangup_cause in (503) $rp_sql,vdl.uniqueid, null)) as sip_erro,
+			COUNT(if($campaign_sql vdl.sip_hangup_cause not in (0,200, 183,486,480,401,403,407,503,603) $rp_sql,vdl.uniqueid, null)) as unknown
 			FROM vicidial_users vu
 			left JOIN vicidial_log vl ON (vu.user_group = vl.user_group or vl.user IN ('VDAD'))  and vu.USER = vl.user
 			left JOIN vicidial_dial_log vdl ON vl.lead_id = vdl.lead_id
@@ -122,6 +127,7 @@
 			$TOPsorted_output[] 					.= '<td nowrap>'.$row['user'].'</td>';
 			$TOPsorted_output[] 					.= '<td nowrap>'.$row['total_call'].'</td>';
 			$TOPsorted_output[] 					.= '<td nowrap>'.$row['answer'].'</td>';
+			$TOPsorted_output[] 					.= '<td nowrap>'.convert($row['total_talk']).'</td>';
 			$TOPsorted_output[] 					.= '<td nowrap>'.$row['noanswer'].'</td>';
 			$TOPsorted_output[] 					.= '<td nowrap>'.$row['congestion'].'</td>';
 			$TOPsorted_output[] 					.= '<td nowrap>'.$row['busy'].'</td>';
