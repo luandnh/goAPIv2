@@ -245,9 +245,15 @@
 	$duration_sql2 = "vcl.length_in_sec as call_duration,";
 
 	if ($RUNcampaign > 0 && $RUNgroup < 1) {
-		$query = "SELECT vl.call_date, $duration_sql vl.phone_number,vtc.vsc_name,vl.status,vt.status_name,vl.user,
-		vu.user_group, vu.full_name,vl.campaign_id,vc.campaign_name,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.user_group,vl.alt_dial,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vi.entry_list_id FROM vicidial_users vu, vicidial_log AS vl join vicidial_campaigns vc on vl.campaign_id = vc.campaign_id,vicidial_list vi LEFT JOIN vicidial_statuses vt on vi.status = vt.status LEFT JOIN vicidial_status_categories vtc on vt.category = vtc.vsc_id
-			WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
+		$query = "
+		SELECT vl.call_date, $duration_sql vl.phone_number,
+		(SELECT vtc.vsc_name FROM vicidial_statuses vt INNER JOIN vicidial_status_categories vtc on vt.category = vtc.vsc_id  WHERE vi.status = vt.status AND vt.`status` = vl.`status`) as vsc_name,
+		(SELECT vt.status_name FROM vicidial_statuses vt INNER JOIN vicidial_status_categories vtc on vt.category = vtc.vsc_id  WHERE vi.status = vt.status AND vt.`status` = vl.`status`) as status_name,
+		vl.user,
+
+		vu.user_group, vu.full_name,vl.campaign_id,vc.campaign_name,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.user_group,vl.alt_dial,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vi.entry_list_id 
+		FROM vicidial_users vu, vicidial_log AS vl join vicidial_campaigns vc on vl.campaign_id = vc.campaign_id,vicidial_list vi 
+		WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
 			AND vu.user=vl.user AND vi.lead_id=vl.lead_id 
 			$list_SQL $campaign_SQL 
 			$user_group_SQL $status_SQL_vl 
@@ -429,6 +435,12 @@
 	foreach ($result as $row) {
 		if ($row['user_group'] == ""){
 			$row['user_group'] = "System";
+		}
+		if ($row['vsc_name'] == ""){
+			$row['vsc_name'] = "Busy Auto";
+		}
+		if ($row['status_name'] == ""){
+			$row['status_name'] = "Default Category";
 		}
 		$lead_id = $row["lead_id"];
 		$uniqueid = $row["uniqueid"];
