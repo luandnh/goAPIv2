@@ -778,6 +778,7 @@
                                         "Legend"                => $legend,
                                         "alex"                 => $alex
                                 );
+                                $aaa = 0;
 
 		} else {
 			$err_msg= error_handle("10001");

@@ -108,17 +108,34 @@
 		// From vicidial_users as vu left join vicidial_log vl on vu.user = vl.user WHERE ".$campaign_sql." vl.call_date BETWEEN '$fromDate' AND '$toDate'  ".$bonus_sql." group by vu.user";
 		// // 
 		
-		$agent_report_query= "
-		select vu.user,
-		(SELECT SUM(val.talk_sec) - SUM(val.dead_sec) FROM vicidial_agent_log val WHERE $val_campaign_sql val.user = vu.user AND val.event_time BETWEEN '$fromDate' AND '$toDate') as total_talk, 
-		COUNT(vl.lead_id) as total_call, 
-		(SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.list_id = vl.list_id and  vli.app_status = 'NE' and vu.user = vli.user $rp_sql) as not_eligable,
-		(SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.list_id = vl.list_id and  vli.app_status = 'NI' and vu.user = vli.user $rp_sql) as not_interested,
-		(SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.list_id = vl.list_id and  vli.app_status = 'AC' and vu.user = vli.user $rp_sql) as app_created,
-		(SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.list_id = vl.list_id and  vli.app_status = 'AP' and vu.user = vli.user $rp_sql) as app_approved,
-		(SELECT Count( vli.lead_id ) FROM vicidial_list AS vli LEFT JOIN vicidial_dial_log vdl on vli.lead_id = vdl.lead_id WHERE vli.list_id = vl.list_id 
-		AND  vdl.sip_hangup_cause = 200 and vu.user = vli.user  $rp_sql ) as total_contacted 
-		From vicidial_users as vu left join vicidial_log vl on vu.user = vl.user WHERE ".$campaign_sql." vl.call_date BETWEEN '$fromDate' AND '$toDate'  ".$bonus_sql." group by vu.user";
+		// $agent_report_query= "
+		// select vu.user,
+		// (SELECT SUM(val.talk_sec) - SUM(val.dead_sec) FROM vicidial_agent_log val WHERE $val_campaign_sql val.user = vu.user AND val.event_time BETWEEN '$fromDate' AND '$toDate') as total_talk, 
+		// COUNT(vl.lead_id) as total_call, 
+		// (SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.list_id = vl.list_id and  vli.app_status = 'NE' and vu.user = vli.user $rp_sql) as not_eligable,
+		// (SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.list_id = vl.list_id and  vli.app_status = 'NI' and vu.user = vli.user $rp_sql) as not_interested,
+		// (SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.list_id = vl.list_id and  vli.app_status = 'AC' and vu.user = vli.user $rp_sql) as app_created,
+		// (SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.list_id = vl.list_id and  vli.app_status = 'AP' and vu.user = vli.user $rp_sql) as app_approved,
+		// (SELECT Count( vli.lead_id ) FROM vicidial_list AS vli LEFT JOIN vicidial_dial_log vdl on vli.lead_id = vdl.lead_id WHERE vli.list_id = vl.list_id 
+		// AND  vdl.sip_hangup_cause = 200 and vu.user = vli.user  $rp_sql ) as total_contacted 
+		// From vicidial_users as vu left join vicidial_log vl on vu.user = vl.user WHERE ".$campaign_sql." vl.call_date BETWEEN '$fromDate' AND '$toDate'  ".$bonus_sql." group by vu.user";
+		$agent_report_query = "
+		SELECT vl.user,
+			COUNT(vl.lead_id) as total_call,
+			(SUM(val.talk_sec) - SUM(val.dead_sec)) as total_talk, 
+			COUNT(vli.app_status = 'NE') as not_eligable,
+			COUNT(vli.app_status = 'NI') as not_interested,
+			COUNT(vli.app_status = 'AC') as app_created,
+			COUNT(vli.app_status = 'AP') as app_approved,
+			COUNT(vdl.sip_hangup_cause = 200) as total_contacted
+			FROM vicidial_log vl LEFT JOIN vicidial_dial_log vdl on  ((FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid)) or (FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid)-1)  or (FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid) + 1)) and vl.lead_id = vdl.lead_id
+			LEFT JOIN  vicidial_agent_log val on  ((FLOOR(vl.uniqueid) = FLOOR(val.uniqueid)) or (FLOOR(vl.uniqueid) = FLOOR(val.uniqueid)-1)  or (FLOOR(vl.uniqueid) = FLOOR(val.uniqueid) + 1))  and vl.lead_id = val.lead_id
+			LEFT JOIN vicidial_list vli on vli.lead_id = vl.lead_id
+			LEFT JOIN vicidial_users  vu on vl.user = vu.user
+			WHERE
+			vl.call_date BETWEEN '$fromDate' AND '$toDate'
+			GROUP BY vl.user
+		";
 
 		// $agent_report_query= "
 		// Select vu.user, sum(vl.length_in_sec) as total_talk, COUNT(vl.phone_number) as total_call, 

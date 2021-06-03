@@ -97,25 +97,44 @@
 		if (isset($fromDate) && isset($toDate)){
 			$rp_sql = "  AND vdl.call_date BETWEEN '$fromDate' AND '$toDate' ";
 		}
-		$agent_report_query= "
-		SELECT DISTINCT vl.user_group, vl.user,
-			(SELECT SUM(val.talk_sec) - SUM(val.dead_sec) FROM vicidial_agent_log val WHERE $val_campaign_sql val.user = vu.user AND val.event_time BETWEEN '$fromDate' AND '$toDate') as total_talk, 
-			COUNT(vl.lead_id) as total_call, 
-			COUNT(if($campaign_sql 1 $rp_sql ,vl.phone_number,null)) as total_call,
-			COUNT(if($campaign_sql vdl.sip_hangup_cause = 200 $rp_sql,vdl.uniqueid, null)) as answer,
-			COUNT(if($campaign_sql vdl.sip_hangup_cause in(183) $rp_sql,vdl.uniqueid, null)) as noanswer,
-			COUNT(if($campaign_sql vdl.sip_hangup_cause > 1500 $rp_sql,vdl.uniqueid, null)) as congestion,
-			COUNT(if($campaign_sql vdl.sip_hangup_cause in(486,480) $rp_sql,vdl.uniqueid, null)) as busy,
-			COUNT(if($campaign_sql vdl.sip_hangup_cause in (401, 403, 407) $rp_sql,vdl.uniqueid, null)) as cancel,
-			COUNT(if($campaign_sql vdl.sip_hangup_cause = 603 $rp_sql,vdl.uniqueid, null)) as denied,
-			COUNT(if($campaign_sql vdl.sip_hangup_cause in (503) $rp_sql,vdl.uniqueid, null)) as sip_erro,
-			COUNT(if($campaign_sql vdl.sip_hangup_cause not in (0,200, 183,486,480,401,403,407,503,603) $rp_sql,vdl.uniqueid, null)) as unknown
-			FROM vicidial_users vu
-			left JOIN vicidial_log vl ON (vu.user_group = vl.user_group or vl.user IN ('VDAD'))  and vu.USER = vl.user
-			left JOIN vicidial_dial_log vdl ON vl.lead_id = vdl.lead_id
-		WHERE ".$campaign_sql." vl.call_date BETWEEN '$fromDate' AND '$toDate' or ( vl.user IN ('VDAD') and vl.list_id not in(998))  ".$bonus_sql."
-		GROUP BY vl.user_group, vl.user";
-		
+		// $agent_report_query= "
+		// SELECT DISTINCT vl.user_group, vl.user,
+		// 	(SELECT SUM(val.talk_sec) - SUM(val.dead_sec) FROM vicidial_agent_log val WHERE $val_campaign_sql val.user = vu.user AND val.event_time BETWEEN '$fromDate' AND '$toDate') as total_talk, 
+		// 	COUNT(vl.lead_id) as total_call, 
+		// 	COUNT(if($campaign_sql 1 $rp_sql ,vl.phone_number,null)) as total_call,
+		// 	COUNT(if($campaign_sql vdl.sip_hangup_cause = 200 $rp_sql,vdl.uniqueid, null)) as answer,
+		// 	COUNT(if($campaign_sql vdl.sip_hangup_cause in(183) $rp_sql,vdl.uniqueid, null)) as noanswer,
+		// 	COUNT(if($campaign_sql vdl.sip_hangup_cause > 1500 $rp_sql,vdl.uniqueid, null)) as congestion,
+		// 	COUNT(if($campaign_sql vdl.sip_hangup_cause in(486,480) $rp_sql,vdl.uniqueid, null)) as busy,
+		// 	COUNT(if($campaign_sql vdl.sip_hangup_cause in (401, 403, 407) $rp_sql,vdl.uniqueid, null)) as cancel,
+		// 	COUNT(if($campaign_sql vdl.sip_hangup_cause = 603 $rp_sql,vdl.uniqueid, null)) as denied,
+		// 	COUNT(if($campaign_sql vdl.sip_hangup_cause in (503) $rp_sql,vdl.uniqueid, null)) as sip_erro,
+		// 	COUNT(if($campaign_sql vdl.sip_hangup_cause not in (0,200, 183,486,480,401,403,407,503,603) $rp_sql,vdl.uniqueid, null)) as unknown
+		// 	FROM vicidial_users vu
+		// 	left JOIN vicidial_log vl ON (vu.user_group = vl.user_group or vl.user IN ('VDAD'))  and vu.USER = vl.user
+		// 	left JOIN vicidial_dial_log vdl ON vl.lead_id = vdl.lead_id
+		// WHERE ".$campaign_sql." vl.call_date BETWEEN '$fromDate' AND '$toDate' or ( vl.user IN ('VDAD') and vl.list_id not in(998))  ".$bonus_sql."
+		// GROUP BY vl.user_group, vl.user";
+		$agent_report_query ="
+		SELECT DISTINCT vl.user_group,vl.user,
+			COUNT(vl.lead_id) as total_call,
+			COUNT(if( vdl.sip_hangup_cause = 200,vdl.lead_id, null)) as answer,
+			(SUM(val.talk_sec) - SUM(val.dead_sec)) as total_talk, 
+			COUNT(if( vdl.sip_hangup_cause in(183),vdl.lead_id, null)) as noanswer,
+			COUNT(if( vdl.sip_hangup_cause > 1500,vdl.lead_id, null)) as congestion,
+			COUNT(if( vdl.sip_hangup_cause in(486,480),vdl.lead_id, null)) as busy,
+			COUNT(if( vdl.sip_hangup_cause in (401, 403, 407),vdl.lead_id, null)) as cancel,
+			COUNT(if( vdl.sip_hangup_cause = 603,vdl.lead_id, null)) as denied,
+			COUNT(if( vdl.sip_hangup_cause in (503),vdl.lead_id, null)) as sip_erro,
+			COUNT(if( vdl.sip_hangup_cause not in (0,200, 183,486,480,401,403,407,503,603),vdl.lead_id, null)) as unknown
+			FROM vicidial_log vl LEFT JOIN vicidial_dial_log vdl on  ((FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid)) or (FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid)-1)  or (FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid) + 1)) and vl.lead_id = vdl.lead_id
+			LEFT JOIN  vicidial_agent_log val on  ((FLOOR(vl.uniqueid) = FLOOR(val.uniqueid)) or (FLOOR(vl.uniqueid) = FLOOR(val.uniqueid)-1)  or (FLOOR(vl.uniqueid) = FLOOR(val.uniqueid) + 1))  and vl.lead_id = val.lead_id
+			LEFT JOIN vicidial_users  vu on (vu.user_group = vl.user_group or vl.user IN ('VDAD'))  and vu.USER = vl.user
+			WHERE
+			vl.call_date BETWEEN '$fromDate' AND '$toDate'
+			GROUP BY vl.user_group, vl.user
+			ORDER BY vl.user_group DESC
+		";
 		//  AND vdl.sip_hangup_cause not in (100)
 		$query 										= $astDB->rawQuery($agent_report_query);
         // file_put_contents("QUANGBUG.log", $agent_report_query, FILE_APPEND | LOCK_EX);
