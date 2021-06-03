@@ -115,8 +115,7 @@
 			LEFT JOIN  vicidial_agent_log val on  ((FLOOR(vl.uniqueid) = FLOOR(val.uniqueid)) or (FLOOR(vl.uniqueid) = FLOOR(val.uniqueid)-1)  or (FLOOR(vl.uniqueid) = FLOOR(val.uniqueid) + 1))  and vl.lead_id = val.lead_id
 			LEFT JOIN vicidial_list vli on vli.lead_id = vl.lead_id
 			LEFT JOIN vicidial_user_groups vug ON vug.user_group = vl.user_group
-			WHERE
-			vl.call_date BETWEEN '$fromDate' AND '$toDate'
+			WHERE $campaign_sql vl.call_date BETWEEN '$fromDate' AND '$toDate'
 			GROUP BY vug.user_group
 		";
         // file_put_contents("QUANGBUG.log", $agent_report_query, FILE_APPEND | LOCK_EX);
