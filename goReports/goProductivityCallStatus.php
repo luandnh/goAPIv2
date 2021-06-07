@@ -127,16 +127,16 @@
 			COUNT(if( vdl.sip_hangup_cause = 603,vdl.lead_id, null)) as denied,
 			COUNT(if( vdl.sip_hangup_cause in (503),vdl.lead_id, null)) as sip_erro,
 			COUNT(if( vdl.sip_hangup_cause not in (0,200, 183,486,480,401,403,407,503,603),vdl.lead_id, null)) as unknown
-			FROM vicidial_log vl LEFT JOIN vicidial_dial_log vdl on  ((FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid)) or (FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid)-1)  or (FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid) + 1)) and vl.lead_id = vdl.lead_id
+			FROM vicidial_log vl INNER JOIN vicidial_dial_log vdl on  ((FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid)) or (FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid)-1)  or (FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid) + 1)) and vl.lead_id = vdl.lead_id
 			LEFT JOIN  vicidial_agent_log val on  ((FLOOR(vl.uniqueid) = FLOOR(val.uniqueid)) or (FLOOR(vl.uniqueid) = FLOOR(val.uniqueid)-1)  or (FLOOR(vl.uniqueid) = FLOOR(val.uniqueid) + 1))  and vl.lead_id = val.lead_id
-			LEFT JOIN vicidial_users  vu on (vu.user_group = vl.user_group or vl.user IN ('VDAD'))  and vu.USER = vl.user
+			JOIN vicidial_users  vu on (vu.user_group = vl.user_group or vl.user IN ('VDAD'))  and vu.USER = vl.user
 			WHERE $campaign_sql vl.call_date BETWEEN '$fromDate' AND '$toDate'
 			GROUP BY vl.user_group, vl.user
 			ORDER BY vl.user_group DESC
 		";
 		//  AND vdl.sip_hangup_cause not in (100)
 		$query 										= $astDB->rawQuery($agent_report_query);
-        // file_put_contents("QUANGBUG.log", $agent_report_query, FILE_APPEND | LOCK_EX);
+        file_put_contents("QUANGBUG.log", $agent_report_query, FILE_APPEND | LOCK_EX);
 		$TOPsorted_output 							= "";
 		$number 									= 1;
 		foreach ($query as $row) {

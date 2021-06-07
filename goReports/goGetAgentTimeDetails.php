@@ -236,6 +236,8 @@ if (empty($goUser) || is_null($goUser)) {
 				->where("vu.user = vl.user")
 				->groupBy("vl.user")
 				->get("vicidial_users vu, vicidial_log vl", $limit, "vl.user, count(vl.lead_id) as calls");
+				
+			// file_put_contents("QUANGBUG.log", $astDB->getLastQuery(), FILE_APPEND | LOCK_EX);
 			if ($astDB->count > 0) {
 				/*$TOTwait 	= array();
 					$TOTtalk 	= array();
