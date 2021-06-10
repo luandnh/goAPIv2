@@ -57,8 +57,13 @@
 			$allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
 			
 			if ($tenant) {
-				$astDB->where("user_group", $log_group);
+				// $astDB->where("user_group", $log_group);
 				//$astDB->orWhere("user_group", "---ALL---");
+				$allowed_campaigns = $allowed_camps['allowed_campaigns'];
+				if (!preg_match("/ALL-CAMPAIGN/", $allowed_campaigns)) {
+					$allowed_campaigns = explode(" ", trim($allowed_campaigns));
+					$astDB->orWhere('campaign_id', $allowed_campaigns, 'in');
+				}
 			} else {
 				if (strtoupper($log_group) !== 'ADMIN') {
 					if ($userlevel > 8) {
@@ -84,7 +89,8 @@
 			
 			$astDB->orderBy('campaign_id', 'desc');
 			$result 									= $astDB->get('vicidial_campaigns', NULL, $cols);		
-			
+
+			file_put_contents("LUANDEBUG.log",$astDB->getLastQuery(), FILE_APPEND | LOCK_EX);
 			if ($astDB->count > 0) {
 				foreach ($result as $fresults){
 					$dataCampID[] 						= $fresults['campaign_id'];
