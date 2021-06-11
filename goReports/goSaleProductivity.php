@@ -48,6 +48,11 @@
 	    $toDate 									= date("Y-m-d") . " 23:59:59";
     	//die($fromDate." - ".$toDate);                                                                 => $err_msg
     } else {
+		$SELECTQuery = $astDB->rawQuery("Select sub_user_group from vicidial_sub_user_groups where user_group='".$log_group."'");
+		foreach($SELECTQuery as $user_group){
+			$user_groups[] = $user_group["sub_user_group"];
+		}
+		array_push($user_groups,$log_group);
 		$user_group_string = implode("','",$user_groups);
 	    // set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 	    // every time we need to filter out requests
@@ -60,12 +65,16 @@
 		$user_group_string = implode("','",$user_groups);
 		$bonus_sql = "";
 	    if ($tenant) {
-			$astDB->where("vl.user_group", $user_groups,"IN");
-			$bonus_sql = "AND vl.user_group IN('".$user_group_string."') ";
-	    } else {
-            if (strtoupper($log_group) != 'ADMIN') {
+	            // $astDB->where("user_group", $log_group);
 				$astDB->where("vl.user_group", $user_groups,"IN");
 				$bonus_sql = "AND vl.user_group IN('".$user_group_string."') ";
+	    } else {
+            if (strtoupper($log_group) != 'ADMIN') {
+                // if ($user_level > 8) {
+                //     $astDB->where("user_group", $log_group);
+                // }
+				$bonus_sql = "AND vl.user_group IN('".$user_group_string."') ";
+				$astDB->where("vl.user_group", $user_groups,"IN");
             }
 	    }
 
@@ -90,56 +99,40 @@
 		if ($campaignID != "" && $campaignID != "ALL"){
 			$campaign_sql = " vl.campaign_id ='".$campaignID."' AND";
 		}
-		$rp_sql = "";
-		if (isset($fromDate) && isset($toDate)){
-			$rp_sql = " AND vli.modify_date BETWEEN '$fromDate' AND '$toDate' ";
-		}
-		// $agent_report_query= "SELECT vug.user_group, sum(IF(vl.length_in_sec>=0, vl.length_in_sec, 0)) as total_talk, COUNT(vl.phone_number) as total_call,
-		// (SELECT Count(vli.lead_id) FROM vicidial_list as vli LEFT JOIN vicidial_users vu ON  vu.user = vli.user WHERE vli.list_id = vl.list_id and  vli.app_status = 'NE' AND vu.user_group = vug.user_group $rp_sql) as not_eligable,
-		// (SELECT Count(vli.lead_id) FROM vicidial_list as vli LEFT JOIN vicidial_users vu ON  vu.user = vli.user WHERE vli.list_id = vl.list_id and  vli.app_status = 'NI' AND vu.user_group = vug.user_group $rp_sql) as not_interested,
-		// (SELECT Count(vli.lead_id) FROM vicidial_list as vli LEFT JOIN vicidial_users vu ON  vu.user = vli.user WHERE vli.list_id = vl.list_id and  vli.app_status = 'AC' AND vu.user_group = vug.user_group $rp_sql) as app_created,
-		// (SELECT Count(vli.lead_id) FROM vicidial_list as vli LEFT JOIN vicidial_users vu ON  vu.user = vli.user WHERE vli.list_id = vl.list_id and  vli.app_status = 'AP' AND vu.user_group = vug.user_group $rp_sql) as app_approved,
-		// (SELECT Count(vli.lead_id) FROM vicidial_list as vli LEFT JOIN vicidial_users vu ON  vu.user = vli.user WHERE vli.list_id = vl.list_id and  vli.STATUS != 'NEW' AND vu.user_group = vug.user_group $rp_sql) as total_contacted
-		// FROM vicidial_user_groups vug left JOIN vicidial_log vl ON vug.user_group = vl.user_group
-		// WHERE ".$campaign_sql." vl.call_date BETWEEN '$fromDate' AND '$toDate' ".$bonus_sql."
-		// GROUP BY vug.user_group";
-		$agent_report_query = "
-		SELECT vl.user_group,
-			COUNT(vl.lead_id) as total_call,
-			(SUM(val.talk_sec) - SUM(val.dead_sec)) as total_talk, 
-			COUNT(vli.app_status = 'NE') as not_eligable,
-			COUNT(vli.app_status = 'NI') as not_interested,
-			COUNT(vli.app_status = 'AC') as app_created,
-			COUNT(vli.app_status = 'AP') as app_approved,
-			COUNT(vdl.sip_hangup_cause = 200) as total_contacted
-			FROM vicidial_log vl INNER JOIN vicidial_dial_log vdl on  ((FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid)) or (FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid)-1)  or (FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid) + 1)) and vl.lead_id = vdl.lead_id
-			LEFT JOIN  vicidial_agent_log val on  ((FLOOR(vl.uniqueid) = FLOOR(val.uniqueid)) or (FLOOR(vl.uniqueid) = FLOOR(val.uniqueid)-1)  or (FLOOR(vl.uniqueid) = FLOOR(val.uniqueid) + 1))  and vl.lead_id = val.lead_id
-			LEFT JOIN vicidial_list vli on vli.lead_id = vl.lead_id
-			LEFT JOIN vicidial_users  vu on vl.user = vu.user
-			LEFT JOIN vicidial_user_groups vug on vu.user_group = vug.user_group
-		WHERE $campaign_sql vl.call_date BETWEEN '$fromDate' AND '$toDate'  and (vl.user_group is not NULL or vl.user in ('VDAD')) 
-		GROUP BY vl.user_group
-		";
+		$agent_report_query= "
+		SELECT
+			vc.campaign_name,
+			COUNT(vl.lead_id) as total_lead,
+			COUNT(if(vl.status != 'NEW',vl.campaign_id,null)) as contacted,
+			COUNT(if(vl.status = 'NEW',vl.campaign_id,null)) as not_contacted,
+			COUNT(if(vli.app_status = 'NI',vl.campaign_id,null)) as not_interested,
+			COUNT(if(vli.app_status = 'NE',vl.campaign_id,null)) as not_eligable,
+			COUNT(if(vli.app_status = 'AC',vl.campaign_id,null)) as app_created,
+			(COUNT(if(vl.status != 'NEW',vl.campaign_id,null))/COUNT(vl.lead_id)*100) as contacted_per,
+			(COUNT(if(vli.app_status = 'AC',vl.campaign_id,null))/COUNT(vl.lead_id)*100) as app_created_per
+		FROM vicidial_log as vl
+		JOIN vicidial_list as vli on vli.lead_id = vl.lead_id
+		RIGHT JOIN vicidial_campaigns as vc ON vl.campaign_id = vc.campaign_id
+		WHERE ".$campaign_sql." vl.call_date BETWEEN '$fromDate' AND '$toDate'  ".$bonus_sql."
+		GROUP BY vl.campaign_id";
         // file_put_contents("QUANGBUG.log", $agent_report_query, FILE_APPEND | LOCK_EX);
 		$query 										= $astDB->rawQuery($agent_report_query);
 		$TOPsorted_output 							= "";
 		$number 									= 1;
 		foreach ($query as $row) {
 			$TOPsorted_output[] 					.= '<tr>';
-		    $TOPsorted_output[] 					.= '<td nowrap>'.$row['user_group'].'</td>';
-		    $TOPsorted_output[] 					.= '<td nowrap>'.$row['total_call'].'</td>';
-			$TOPsorted_output[] 					.= '<td nowrap>'.$row['total_contacted'].'</td>';
-			$TOPsorted_output[] 					.= '<td nowrap>'.convert($row['total_talk']).'</td>';
+		    $TOPsorted_output[] 					.= '<td nowrap>'.$row['campaign_name'].'</td>';
+		    $TOPsorted_output[] 					.= '<td nowrap>'.$row['total_lead'].'</td>';
+			$TOPsorted_output[] 					.= '<td nowrap>'.$row['not_contacted'].'</td>';
+			$TOPsorted_output[] 					.= '<td nowrap>'.$row['contacted'].'</td>';
 			$TOPsorted_output[] 					.= '<td nowrap>'.'0'.'</td>';
 			$TOPsorted_output[] 					.= '<td nowrap>'.$row['not_interested'].'</td>';
 			$TOPsorted_output[] 					.= '<td nowrap>'.$row['not_eligable'].'</td>';
 			$TOPsorted_output[] 					.= '<td nowrap>'.$row['app_created'].'</td>';
-			$TOPsorted_output[] 					.= '<td nowrap>'.$row['app_approved'].'</td>';
-			$TOPsorted_output[] 					.= '<td nowrap>'.'0'.'</td>';
-			$TOPsorted_output[] 					.= '<td nowrap>'.'0'.'</td>';
+			$TOPsorted_output[] 					.= '<td nowrap>'.($row['contacted_per']+0).'%</td>';
+			$TOPsorted_output[] 					.= '<td nowrap>'.($row['app_created_per']+0).'%</td>';
 			$TOPsorted_output[] 					.= '</tr>';
 		}
-
 		$apiresults 								= array(
 		    "result" 									=> "success",
 		    "inbound_query" 							=> $inbound_report_query,

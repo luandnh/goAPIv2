@@ -132,7 +132,7 @@
 			LEFT JOIN  vicidial_agent_log val on  ((FLOOR(vl.uniqueid) = FLOOR(val.uniqueid)) or (FLOOR(vl.uniqueid) = FLOOR(val.uniqueid)-1)  or (FLOOR(vl.uniqueid) = FLOOR(val.uniqueid) + 1))  and vl.lead_id = val.lead_id
 			LEFT JOIN vicidial_list vli on vli.lead_id = vl.lead_id
 			LEFT JOIN vicidial_users  vu on vl.user = vu.user
-			WHERE  $campaign_sql  vl.call_date BETWEEN '$fromDate' AND '$toDate'
+			WHERE  $campaign_sql  vl.call_date BETWEEN '$fromDate' AND '$toDate'  and (vl.user_group is not NULL or vl.user in ('VDAD')) 
 			GROUP BY vl.user
 		";
 

@@ -243,22 +243,52 @@ $duration_sql = "vl.length_in_sec as call_duration,";
 $duration_sql2 = "vcl.length_in_sec as call_duration,";
 
 if ($RUNcampaign > 0 && $RUNgroup < 1) {
-	$query = "
-		SELECT vl.call_date, $duration_sql vl.phone_number,
-		(SELECT vtc.vsc_name FROM vicidial_statuses vt INNER JOIN vicidial_status_categories vtc on vt.category = vtc.vsc_id  WHERE vi.status = vt.status AND vt.`status` = vl.`status`) as vsc_name,
-		(SELECT vt.status_name FROM vicidial_statuses vt INNER JOIN vicidial_status_categories vtc on vt.category = vtc.vsc_id  WHERE vi.status = vt.status AND vt.`status` = vl.`status`) as status_name,
-		vl.user,
+	// $query = "
+	// 	SELECT vl.call_date, $duration_sql vl.phone_number,
+	// 	(SELECT vtc.vsc_name FROM vicidial_statuses vt INNER JOIN vicidial_status_categories vtc on vt.category = vtc.vsc_id  WHERE vi.status = vt.status AND vt.`status` = vl.`status`) as vsc_name,
+	// 	(SELECT vt.status_name FROM vicidial_statuses vt INNER JOIN vicidial_status_categories vtc on vt.category = vtc.vsc_id  WHERE vi.status = vt.status AND vt.`status` = vl.`status`) as status_name,
+	// 	vl.user,
 
-		vu.user_group, vu.full_name,vl.campaign_id,vc.campaign_name,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.user_group,vl.alt_dial,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vi.entry_list_id 
-		FROM vicidial_users vu, vicidial_log AS vl join vicidial_campaigns vc on vl.campaign_id = vc.campaign_id
-		INNER JOIN vicidial_dial_log vdl on  ((FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid)) or (FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid)-1)  or (FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid) + 1)) and vl.lead_id = vdl.lead_id,
-		vicidial_list vi 
-		WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
-			AND vu.user=vl.user AND vi.lead_id=vl.lead_id 
-			$list_SQL $campaign_SQL 
-			$user_group_SQL $status_SQL_vl 
-			order by vl.call_date
-			$limit_SQL";
+	// 	vu.user_group, vu.full_name,vl.campaign_id,vc.campaign_name,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.user_group,vl.alt_dial,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vi.entry_list_id 
+	// 	FROM vicidial_users vu, vicidial_log AS vl join vicidial_campaigns vc on vl.campaign_id = vc.campaign_id
+	// 	INNER JOIN vicidial_dial_log vdl on  ((FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid)) or (FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid)-1)  or (FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid) + 1)) and vl.lead_id = vdl.lead_id,
+	// 	vicidial_list vi 
+	// 	WHERE (date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate') 
+	// 		AND vu.user=vl.user AND vi.lead_id=vl.lead_id 
+	// 		$list_SQL $campaign_SQL 
+	// 		$user_group_SQL $status_SQL_vl 
+	// 		order by vl.call_date
+	// 		$limit_SQL";
+	$query = "
+	SELECT vl.call_date, $duration_sql vl.phone_number,
+	(SELECT vtc.vsc_name FROM vicidial_statuses vt INNER JOIN vicidial_status_categories vtc on vt.category = vtc.vsc_id  WHERE vi.status = vt.status AND vt.`status` = vl.`status`) as vsc_name,
+	(SELECT vt.status_name FROM vicidial_statuses vt INNER JOIN vicidial_status_categories vtc on vt.category = vtc.vsc_id  WHERE vi.status = vt.status AND vt.`status` = vl.`status`) as status_name,
+	vl.user,
+	vu.user_group, vu.full_name,vl.campaign_id,vc.campaign_name,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.user_group,vl.alt_dial,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vi.entry_list_id 
+	FROM
+	vicidial_log AS vl
+	LEFT JOIN vicidial_campaigns vc ON vl.campaign_id = vc.campaign_id
+	INNER JOIN vicidial_dial_log vdl ON (
+		( FLOOR( vl.uniqueid ) = FLOOR( vdl.uniqueid ) ) 
+		OR ( FLOOR( vl.uniqueid ) = FLOOR( vdl.uniqueid ) - 1 ) 
+		OR ( FLOOR( vl.uniqueid ) = FLOOR( vdl.uniqueid ) + 1 ) 
+	) 
+	AND vl.lead_id = vdl.lead_id
+	LEFT JOIN vicidial_agent_log val ON (
+		( FLOOR( vl.uniqueid ) = FLOOR( val.uniqueid ) ) 
+		OR ( FLOOR( vl.uniqueid ) = FLOOR( val.uniqueid ) - 1 ) 
+		OR ( FLOOR( vl.uniqueid ) = FLOOR( val.uniqueid ) + 1 ) 
+	) 
+	AND vl.lead_id = val.lead_id
+	LEFT JOIN vicidial_list vi ON vi.lead_id = vl.lead_id
+	LEFT JOIN vicidial_users vu ON vl.USER = vu.USER 
+	WHERE
+	(date_format(vl.call_date, '%Y-%m-%d %H:%i:%s') BETWEEN '$fromDate' AND '$toDate')
+	AND ( vl.user_group IS NOT NULL OR vl.USER IN ( 'VDAD' ) )
+	order by vl.call_date 
+		$limit_SQL
+		$user_group_SQL $status_SQL_vl
+		";
 }
 
 if ($RUNgroup > 0 && $RUNcampaign < 1) {
@@ -374,7 +404,7 @@ if ($RUNcampaign > 0 && $RUNgroup > 0) {
 }
 
 $result = $astDB->rawQuery($query);
-// file_put_contents("QUANGBUG.log", $query, FILE_APPEND | LOCK_EX);
+file_put_contents("QUANGBUG.log", $query, FILE_APPEND | LOCK_EX);
 //$apiresults = array ( "QUERY" => $query, "EXECUTED LAST" => $astDB->getLastQuery(), "ANY DATA" => $result);
 
 // CONVERT RETURN OF rawQuery to Arrays
