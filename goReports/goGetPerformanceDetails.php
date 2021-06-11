@@ -22,7 +22,7 @@
 */
 	error_reporting(E_ERROR | E_PARSE);
     include_once("goAPI.php");
-
+    $updateUsergroup = $astDB->rawQuery("Update vicidial_log vl INNER JOIN vicidial_users vu on vl.user = vu.user set vl.user_group = vu.user_group where vl.user_group is NULL");
 	$fromDate 										= (empty($_REQUEST['fromDate']) ? date("Y-m-d")." 00:00:00" : $astDB->escape($_REQUEST['fromDate']));
 	$toDate 										= (empty($_REQUEST['toDate']) ? date("Y-m-d")." 23:59:59" : $astDB->escape($_REQUEST['toDate']));
 	$campaign_id 									= $astDB->escape($_REQUEST['campaignID']);

@@ -402,9 +402,12 @@ if ($RUNcampaign > 0 && $RUNgroup > 0) {
 			order by vcl.call_date) 
 			$limit_SQL;";
 }
+// 
 
+$updateUsergroup = $astDB->rawQuery("Update vicidial_log vl INNER JOIN vicidial_users vu on vl.user = vu.user set vl.user_group = vu.user_group where vl.user_group is NULL");
+// 
 $result = $astDB->rawQuery($query);
-file_put_contents("QUANGBUG.log", $query, FILE_APPEND | LOCK_EX);
+// file_put_contents("QUANGBUG.log", $query, FILE_APPEND | LOCK_EX);
 //$apiresults = array ( "QUERY" => $query, "EXECUTED LAST" => $astDB->getLastQuery(), "ANY DATA" => $result);
 
 // CONVERT RETURN OF rawQuery to Arrays

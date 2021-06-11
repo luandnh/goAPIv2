@@ -26,7 +26,7 @@
 	include_once("goReportsFunctions.php");
 	
 	$campaigns 										= allowed_campaigns($log_group, $goDB, $astDB);
-
+	$updateUsergroup = $astDB->rawQuery("Update vicidial_log vl INNER JOIN vicidial_users vu on vl.user = vu.user set vl.user_group = vu.user_group where vl.user_group is NULL");
 	// need function go_sec_convert();
     $pageTitle 										= strtolower($astDB->escape($_REQUEST['pageTitle']));
     $fromDate 										= $astDB->escape($_REQUEST['fromDate']);

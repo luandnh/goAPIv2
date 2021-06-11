@@ -26,7 +26,7 @@
 //error_reporting(E_ALL);
 
     include_once("goAPI.php");
-
+	$updateUsergroup = $astDB->rawQuery("Update vicidial_log vl INNER JOIN vicidial_users vu on vl.user = vu.user set vl.user_group = vu.user_group where vl.user_group is NULL");
     $fromDate 										= $astDB->escape($_REQUEST['fromDate']);
     $toDate 										= $astDB->escape($_REQUEST['toDate']);
     $userId 									= $astDB->escape($_REQUEST['userId']);
