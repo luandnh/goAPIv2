@@ -501,7 +501,8 @@ if ($sipIsLoggedIn) {
                             'called_since_last_reset' => 'Y',
                             'entry_date' => $ENTRYdate,
                             'last_local_call_time' => $NOW_TIME,
-                            'vendor_lead_code' => $vendor_lead_code
+                            'vendor_lead_code' => $vendor_lead_code,
+                            'partner_code' => "TEL"
                         );
                         $rslt = $astDB->insert('vicidial_list', $insertData);
                         $affected_rows = $astDB->getRowCount();
@@ -520,7 +521,8 @@ if ($sipIsLoggedIn) {
                         'called_since_last_reset' => 'Y',
                         'entry_date' => $ENTRYdate,
                         'last_local_call_time' => $NOW_TIME,
-                        'vendor_lead_code' => $vendor_lead_code
+                        'vendor_lead_code' => $vendor_lead_code,
+                        'partner_code' => "TEL"
                     );
                     $rslt = $astDB->insert('vicidial_list', $insertData);
                     $affected_rows = $astDB->getRowCount();

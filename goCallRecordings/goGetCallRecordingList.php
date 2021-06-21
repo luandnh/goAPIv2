@@ -37,6 +37,8 @@ $identity_filter = $astDB->escape($_REQUEST['identity_filter']);
 $leadcode_filter = $astDB->escape($_REQUEST['leadcode_filter']);
 $leadsubid_filter = $astDB->escape($_REQUEST['leadsubid_filter']);
 $direction_filter = $astDB->escape($_REQUEST['direction_filter']);
+$limit = $astDB->escape($_REQUEST['limit']);
+$offset = $astDB->escape($_REQUEST['offset']);
 // ERROR CHECKING 
 if (empty($goUser) || is_null($goUser)) {
 	$apiresults = array(
@@ -125,9 +127,8 @@ if (empty($goUser) || is_null($goUser)) {
 			"rl.b64encoded"
 		);
 		$astDB->orderBy('rl.start_time', 'DESC');
-		$offset = 0;
-		$limit = 100;
-		$rsltv = $astDB->get("recording_log rl", null, $cols, true);
+		// $rsltv = $astDB->get("recording_log rl", null, $cols, true);
+		$rsltv = $astDB->get("recording_log rl", array($offset, $limit), $cols, true);
 		$total = $astDB->unlimitedCount;
 		$data = array();
 		if ($astDB->count > 0) {
