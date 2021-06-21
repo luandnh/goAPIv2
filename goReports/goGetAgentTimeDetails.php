@@ -87,6 +87,7 @@ if (empty($goUser) || is_null($goUser)) {
 				}
 			}
 			$SELECTQuery = $astDB->rawQuery("Select sub_user_group from vicidial_sub_user_groups where user_group='" . $log_group . "'");
+			
 			foreach ($SELECTQuery as $user_group) {
 				$user_groups[] = $user_group["sub_user_group"];
 			}
@@ -99,9 +100,12 @@ if (empty($goUser) || is_null($goUser)) {
 				$bonus_sql = "AND vl.user_group IN('" . $user_group_string . "') ";
 			} else {
 				if (strtoupper($log_group) != 'ADMIN') {
-					if ($userlevel < 9) {
+					// if ($userlevel < 9) {
+					// 	$astDB->where("vl.user_group", $user_groups, "IN");
+					// 	// $bonus_sql = "AND vl.user_group IN('" . $user_group_string . "') ";
+					// }
+					if ($userlevel > 8) {
 						$astDB->where("vl.user_group", $user_groups, "IN");
-						$bonus_sql = "AND vl.user_group IN('" . $user_group_string . "') ";
 					}
 				}
 			}
@@ -137,18 +141,25 @@ if (empty($goUser) || is_null($goUser)) {
 			$PCpause_secsARY					= array();
 
 			if ($tenant) {
-				$astDB->where("user_group", $log_group);
+				// $astDB->where("user_group", $log_group);
+				$user_groups[] = '---ALL---';
+				$astDB->where("user_group", $user_groups, "IN");
 			} else {
 				if (strtoupper($log_group) != 'ADMIN') {
-					if ($user_level < 9) {
-						$astDB->where("user_group", $log_group);
+					// if ($userlevel < 9) {
+					// 	$astDB->where("vl.user_group", $user_groups, "IN");
+					// 	// $bonus_sql = "AND vl.user_group IN('" . $user_group_string . "') ";
+					// }
+					if ($userlevel > 8) {
+						$user_groups[] = '---ALL---';
+						$astDB->where("user_group", $user_groups, "IN");
 					}
 				}
 			}
 
+
 			if ("ALL" === strtoupper($campaign_id)) {
 				$SELECTQuery = $astDB->get("vicidial_campaigns", NULL, "campaign_id");
-
 				foreach ($SELECTQuery as $camp_val) {
 					$array_camp[] = $camp_val["campaign_id"];
 				}
@@ -175,9 +186,9 @@ if (empty($goUser) || is_null($goUser)) {
 				->groupBy("vu.user,sub_status")
 				->orderBy("vu.user,sub_status")
 				->get("vicidial_agent_log as val", $limit, $cols);
-
+			
 			if ($astDB->count > 0) {
-				foreach ($pcs_data as $pc_data) {
+					foreach ($pcs_data as $pc_data) {
 					$PCfull_name[]	= $pc_data['full_name'];
 					$PCuser[] 	= $pc_data['user'];
 					$PCpause_sec[] 	= $pc_data['pause_sec'];
@@ -199,11 +210,12 @@ if (empty($goUser) || is_null($goUser)) {
 			}
 
 			if ($tenant) {
-				$astDB->where("user_group", $log_group);
+				$user_groups[] = '---ALL---';
+				$astDB->where("vu.user_group", $user_groups, "IN");
 			} else {
 				if (strtoupper($log_group) != 'ADMIN') {
-					if ($user_level < 9) {
-						$astDB->where("user_group", $log_group);
+					if ($userlevel > 8) {
+						$astDB->where("vu.user_group", $user_groups, "IN");
 					}
 				}
 			}
@@ -225,19 +237,16 @@ if (empty($goUser) || is_null($goUser)) {
 				->where("status != 'NULL'")
 				->orderBy("user", "DESC")
 				->get("vicidial_agent_log val", 10000000, $cols);
-
-			// file_put_contents("QUANGBUG.log", $astDB->getLastQuery(), FILE_APPEND | LOCK_EX);
 			$query_td = $astDB->getLastQuery();
 			$usercount = $astDB->getRowCount();
-
+			// file_put_contents("QUANGBUG.log", $astDB->getLastQuery(), FILE_APPEND | LOCK_EX);
 			$agenttotalcalls = $astDB
 				->where("date_format(vl.call_date, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
 				->where("campaign_id", $array_camp, "IN")
 				->where("vu.user = vl.user")
 				->groupBy("vl.user")
 				->get("vicidial_users vu, vicidial_log vl", $limit, "vl.user, count(vl.lead_id) as calls");
-				
-			// file_put_contents("QUANGBUG.log", $astDB->getLastQuery(), FILE_APPEND | LOCK_EX);
+			
 			if ($astDB->count > 0) {
 				/*$TOTwait 	= array();
 					$TOTtalk 	= array();
