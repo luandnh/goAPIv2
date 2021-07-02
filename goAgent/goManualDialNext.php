@@ -183,6 +183,7 @@ if ($sipIsLoggedIn) {
     $astDB->where('phone_number', $phone_number);
     $astDB->where('lead_id', $lead_id);
     $query = $astDB->getOne('vicidial_list');
+    // file_put_contents("LUANDEBUG.log",  "------------187----------\n", FILE_APPEND | LOCK_EX);
     if (count($query)) {
         $list_id = $query['list_id'];
         $phone_code = $query['phone_code'];
@@ -441,6 +442,7 @@ if ($sipIsLoggedIn) {
                         $astDB->orderBy('modify_date', 'desc');
                         $rslt = $astDB->getOne('vicidial_list', 'lead_id');
                         $man_leadID_ct = $astDB->getRowCount();
+                        // file_put_contents("LUANDEBUG.log",  "------------445----------\n", FILE_APPEND | LOCK_EX);
                         if ( (count($man_leadID_ct) > 0) and (strlen($phone_number) >= $manual_dial_min_digits) )
                             {$override_phone++;}
                     } else {
@@ -452,13 +454,19 @@ if ($sipIsLoggedIn) {
                         
                         // Get allowed campaigns and list ids for the tenant
                         $campaign_SQL = "";
-                        if (!preg_match("/ALL-CAMPAIGNS/", $allowed_campaigns)) {
-                            $campaign_SQL = "vc.campaign_id IN ('$allowed_campaigns') AND";
-                        }
+                        
+                        // if (!preg_match("/ALL-CAMPAIGNS/", $allowed_campaigns) ) {
+                        //     if ($allowed_campaigns != ''){
+                        //         $campaign_SQL = "vc.campaign_id IN ('$allowed_campaigns') AND";
+                        //     }
+                        // } else{
+                        // file_put_contents("LUANDEBUG.log","ALLOW - ".$allowed_campaigns. "\n", FILE_APPEND | LOCK_EX);
+                        // }
                         $stmt="SELECT list_id,manual_dial_list_id FROM vicidial_lists AS vl, vicidial_campaigns AS vc WHERE $campaign_SQL vl.campaign_id=vc.campaign_id;";
                         $rslt = $astDB->rawQuery($stmt);
                         $Xct = $astDB->getRowCount();
                         
+                        file_put_contents("LUANDEBUG.log", $stmt. "\n", FILE_APPEND | LOCK_EX);
                         if ($Xct > 0) {
                             //for ($i=0;$i<$Xct;$i++) {
                             //    $Xrow = mysql_fetch_row($rslt);
@@ -483,13 +491,16 @@ if ($sipIsLoggedIn) {
                         $astDB->orderBy('modify_date', 'desc');
                         $rslt = $astDB->getOne('vicidial_list', 'lead_id');
                         $man_leadID_ct = $astDB->getRowCount();
+                        // file_put_contents("LUANDEBUG.log",  "------------494----------".$astDB->getLastQuery()."\n", FILE_APPEND | LOCK_EX);
                     }
                     if ($man_leadID_ct > 0) {
                         $affected_rows = 1;
                         $row = $rslt;
                         $lead_id = $row['lead_id'];
+                        // file_put_contents("LUANDEBUG.log", $row['lead_id']."\n", FILE_APPEND | LOCK_EX);
                         $CBleadIDset = 1;
-                    } else {
+                    } else { 
+                        // file_put_contents("LUANDEBUG.log","518 ".  $astDB->getLastQuery(). "\n", FILE_APPEND | LOCK_EX);
                         ### insert a new lead in the system with this phone number
                         //$stmt = "INSERT INTO vicidial_list SET phone_code='$phone_code',phone_number='$phone_number',list_id='$list_id',status='QUEUE',user='$user',called_since_last_reset='Y',entry_date='$ENTRYdate',last_local_call_time='$NOW_TIME',vendor_lead_code='$vendor_lead_code';";
                         $insertData = array(
@@ -507,9 +518,11 @@ if ($sipIsLoggedIn) {
                         $rslt = $astDB->insert('vicidial_list', $insertData);
                         $affected_rows = $astDB->getRowCount();
                         $lead_id = $astDB->getInsertId();
+                        // file_put_contents("LUANDEBUG.log", "518 INSERT ".$lead_id. "\n", FILE_APPEND | LOCK_EX);
                         $CBleadIDset = 1;
                     }
                 } else {
+                    // file_put_contents("LUANDEBUG.log",  $astDB->getLastQuery(). "\n", FILE_APPEND | LOCK_EX);
                     ### insert a new lead in the system with this phone number
                     //$stmt = "INSERT INTO vicidial_list SET phone_code='$phone_code',phone_number='$phone_number',list_id='$list_id',status='QUEUE',user='$user',called_since_last_reset='Y',entry_date='$ENTRYdate',last_local_call_time='$NOW_TIME',vendor_lead_code='$vendor_lead_code';";
                     $insertData = array(
@@ -527,6 +540,7 @@ if ($sipIsLoggedIn) {
                     $rslt = $astDB->insert('vicidial_list', $insertData);
                     $affected_rows = $astDB->getRowCount();
                     $lead_id = $astDB->getInsertId();
+                    file_put_contents("LUANDEBUG.log", " 540 INSERT ".$lead_id. "\n", FILE_APPEND | LOCK_EX);
                     $CBleadIDset = 1;
                 }
             } else {
@@ -1843,4 +1857,3 @@ if ($sipIsLoggedIn) {
     }
     $APIResult = array( "result" => "error", "message" => $message );
 }
-?>

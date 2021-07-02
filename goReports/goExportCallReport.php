@@ -261,13 +261,14 @@ if ($RUNcampaign > 0 && $RUNgroup < 1) {
 	// 		$limit_SQL";
 	$query = "
 	SELECT vl.call_date, $duration_sql vl.phone_number,
-	(SELECT vtc.vsc_name FROM vicidial_statuses vt INNER JOIN vicidial_status_categories vtc on vt.category = vtc.vsc_id  WHERE vi.status = vt.status AND vt.`status` = vl.`status`) as vsc_name,
-	(SELECT vt.status_name FROM vicidial_statuses vt INNER JOIN vicidial_status_categories vtc on vt.category = vtc.vsc_id  WHERE vi.status = vt.status AND vt.`status` = vl.`status`) as status_name,
+	vsc.vsc_name, vt.status_name,
 	vl.user,
 	vu.user_group, vu.full_name,vl.campaign_id,vc.campaign_name,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vl.user_group,vl.alt_dial,vi.rank,vi.owner,vi.lead_id,vl.uniqueid,vi.entry_list_id 
 	FROM
 	vicidial_log AS vl
 	LEFT JOIN vicidial_campaigns vc ON vl.campaign_id = vc.campaign_id
+	LEFT JOIN vicidial_statuses vt on vl.status = vt.status
+	LEFT JOIN vicidial_status_categories vsc on vt.category = vsc.vsc_id
 	INNER JOIN vicidial_dial_log vdl ON (
 		( FLOOR( vl.uniqueid ) = FLOOR( vdl.uniqueid ) ) 
 		OR ( FLOOR( vl.uniqueid ) = FLOOR( vdl.uniqueid ) - 1 ) 
@@ -290,7 +291,7 @@ if ($RUNcampaign > 0 && $RUNgroup < 1) {
 		$user_group_SQL $status_SQL_vl
 		";
 }
-
+file_put_contents("QUANGBUG.log", $query, FILE_APPEND | LOCK_EX);
 if ($RUNgroup > 0 && $RUNcampaign < 1) {
 	$query	= "SELECT vcl.call_date, $duration_sql2 vcl.phone_number,vcl.status,vcl.user,vu.full_name,vcl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,	vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vcl.user_group,vcl.queue_seconds,vi.rank,vi.owner,vi.lead_id,vcl.closecallid, vcl.uniqueid,vi.entry_list_id 
 			FROM vicidial_users vu, vicidial_closer_log vcl, vicidial_list vi 
@@ -404,9 +405,11 @@ if ($RUNcampaign > 0 && $RUNgroup > 0) {
 }
 // 
 
+
 $updateUsergroup = $astDB->rawQuery("Update vicidial_log vl INNER JOIN vicidial_users vu on vl.user = vu.user set vl.user_group = vu.user_group where vl.user_group is NULL");
 // 
 $result = $astDB->rawQuery($query);
+
 // file_put_contents("QUANGBUG.log", $query, FILE_APPEND | LOCK_EX);
 //$apiresults = array ( "QUERY" => $query, "EXECUTED LAST" => $astDB->getLastQuery(), "ANY DATA" => $result);
 
