@@ -269,18 +269,6 @@ if ($RUNcampaign > 0 && $RUNgroup < 1) {
 	LEFT JOIN vicidial_campaigns vc ON vl.campaign_id = vc.campaign_id
 	LEFT JOIN vicidial_statuses vt on vl.status = vt.status
 	LEFT JOIN vicidial_status_categories vsc on vt.category = vsc.vsc_id
-	INNER JOIN vicidial_dial_log vdl ON (
-		( FLOOR( vl.uniqueid ) = FLOOR( vdl.uniqueid ) ) 
-		OR ( FLOOR( vl.uniqueid ) = FLOOR( vdl.uniqueid ) - 1 ) 
-		OR ( FLOOR( vl.uniqueid ) = FLOOR( vdl.uniqueid ) + 1 ) 
-	) 
-	AND vl.lead_id = vdl.lead_id
-	LEFT JOIN vicidial_agent_log val ON (
-		( FLOOR( vl.uniqueid ) = FLOOR( val.uniqueid ) ) 
-		OR ( FLOOR( vl.uniqueid ) = FLOOR( val.uniqueid ) - 1 ) 
-		OR ( FLOOR( vl.uniqueid ) = FLOOR( val.uniqueid ) + 1 ) 
-	) 
-	AND vl.lead_id = val.lead_id
 	LEFT JOIN vicidial_list vi ON vi.lead_id = vl.lead_id
 	LEFT JOIN vicidial_users vu ON vl.USER = vu.USER 
 	WHERE

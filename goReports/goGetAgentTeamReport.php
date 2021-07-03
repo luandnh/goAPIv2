@@ -106,7 +106,7 @@
 		$agent_report_query = "
 		SELECT vl.user_group,
 			COUNT(vl.lead_id) as total_call,
-			(SUM(val.talk_sec) - SUM(val.dead_sec)) as total_talk, 
+			(SELECT (SUM(val.talk_sec) - SUM(val.dead_sec)) as total_talk FROM vicidial_agent_log val WHERE val.event_time  BETWEEN '$fromDate' AND '$toDate' and val.`user` = vl.`user`) as total_talk,
 			COUNT(vli.app_status = 'NE') as not_eligable,
 			COUNT(vli.app_status = 'NI') as not_interested,
 			COUNT(vli.app_status = 'AC') as app_created,

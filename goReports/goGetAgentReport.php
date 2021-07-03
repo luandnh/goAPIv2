@@ -122,14 +122,13 @@
 		$agent_report_query = "
 		SELECT vl.user,
 			COUNT(vl.lead_id) as total_call,
-			(SUM(val.talk_sec) - SUM(val.dead_sec)) as total_talk, 
+			(SELECT (SUM(val.talk_sec) - SUM(val.dead_sec)) as total_talk FROM vicidial_agent_log val WHERE val.event_time  BETWEEN '$fromDate' AND '$toDate' and val.`user` = vl.`user`) as total_talk,
 			COUNT(vli.app_status = 'NE') as not_eligable,
 			COUNT(vli.app_status = 'NI') as not_interested,
 			COUNT(vli.app_status = 'AC') as app_created,
 			COUNT(vli.app_status = 'AP') as app_approved,
 			COUNT(vdl.sip_hangup_cause = 200) as total_contacted
 			FROM vicidial_log vl INNER JOIN vicidial_dial_log vdl on  ((FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid)) or (FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid)-1)  or (FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid) + 1)) and vl.lead_id = vdl.lead_id
-			LEFT JOIN  vicidial_agent_log val on  ((FLOOR(vl.uniqueid) = FLOOR(val.uniqueid)) or (FLOOR(vl.uniqueid) = FLOOR(val.uniqueid)-1)  or (FLOOR(vl.uniqueid) = FLOOR(val.uniqueid) + 1))  and vl.lead_id = val.lead_id
 			LEFT JOIN vicidial_list vli on vli.lead_id = vl.lead_id
 			LEFT JOIN vicidial_users  vu on vl.user = vu.user
 			WHERE  $campaign_sql  vl.call_date BETWEEN '$fromDate' AND '$toDate'  and (vl.user_group is not NULL or vl.user in ('VDAD')) 
