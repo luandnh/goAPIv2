@@ -1015,7 +1015,7 @@ if ($sipIsLoggedIn) {
             //$stmt="SELECT lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner,entry_list_id FROM vicidial_list where lead_id='$lead_id' LIMIT 1;";
             $astDB->where('lead_id', $lead_id);
             //EASYCREDIT
-            $rslt = $astDB->getOne('vicidial_list', 'lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner,entry_list_id,partner_code,identity_number,app_status,identity_issued_on,identity_issued_by,request_id,call_status');
+            $rslt = $astDB->getOne('vicidial_list', 'lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner,entry_list_id,partner_code,app_status,identity_number,identity_issued_on,identity_issued_by,alt_identity_number,alt_identity_issued_on,alt_identity_issued_by,request_id,call_status');
             //EASYCREDIT
             $list_lead_ct = $astDB->getRowCount();
             if ($list_lead_ct > 0) {
@@ -1060,6 +1060,9 @@ if ($sipIsLoggedIn) {
                 $identity_number = trim("{$row['identity_number']}");
                 $identity_issued_on = trim("{$row['identity_issued_on']}");
                 $identity_issued_by = trim("{$row['identity_issued_by']}");
+                $alt_identity_number = trim("{$row['alt_identity_number']}");
+                $alt_identity_issued_on = trim("{$row['alt_identity_issued_on']}");
+                $alt_identity_issued_by = trim("{$row['alt_identity_issued_by']}");
                 $app_status  = trim("{$row['app_status']}");
                 $call_status  = trim("{$row['call_status']}");
                 //EASYCREDIT
@@ -1837,6 +1840,9 @@ if ($sipIsLoggedIn) {
                 'identity_number' => $identity_number,
                 'identity_issued_on' => $identity_issued_on,
                 'identity_issued_by' => $identity_issued_by,
+                'alt_identity_number' => $alt_identity_number,
+                'alt_identity_issued_on' => $alt_identity_issued_on,
+                'alt_identity_issued_by' => $alt_identity_issued_by,
                 'app_status' => $app_status,
                 'call_status' => $call_status
                 //EASYCREDIT
