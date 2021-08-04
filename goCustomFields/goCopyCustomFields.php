@@ -294,7 +294,7 @@
                     $field_sql .="";  
                 }
                 
-                if ($tableExist > 0) {
+		if ($tableExist > 0) {
                     $field_sql .= ";";
                 } else {
                     $field_sql .= ");";

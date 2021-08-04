@@ -127,7 +127,7 @@
 			COUNT(vli.app_status = 'NI') as not_interested,
 			COUNT(vli.app_status = 'AC') as app_created,
 			COUNT(vli.app_status = 'AP') as app_approved,
-			COUNT(vdl.sip_hangup_cause = 200) as total_contacted
+			(SELECT COUNT(if( vl2.length_in_sec>0, vl2.lead_id, null)) as total_contacted from vicidial_log vl2 WHERE vl2.call_date  BETWEEN '$fromDate' AND '$toDate' and vl2.`user` = vl.`user`) as  total_contacted,
 			FROM vicidial_log vl INNER JOIN vicidial_dial_log vdl on  ((FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid)) or (FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid)-1)  or (FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid) + 1)) and vl.lead_id = vdl.lead_id
 			LEFT JOIN vicidial_list vli on vli.lead_id = vl.lead_id
 			LEFT JOIN vicidial_users  vu on vl.user = vu.user

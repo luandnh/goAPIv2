@@ -117,8 +117,8 @@
 		// GROUP BY vl.user_group, vl.user";
 		$agent_report_query ="
 		SELECT DISTINCT vl.user_group,vl.user,
-			COUNT(vl.lead_id) as total_call,
-			COUNT(if( vdl.sip_hangup_cause = 200,vdl.lead_id, null)) as answer,
+			(SELECT COUNT(vl2.lead_id) as total_call from vicidial_log vl2 WHERE vl2.call_date  BETWEEN '$fromDate' AND '$toDate' and vl2.`user` = vl.`user`) as total_call,
+			(SELECT COUNT(if( vl2.length_in_sec>0, vl2.lead_id, null)) as answer from vicidial_log vl2 WHERE vl2.call_date  BETWEEN '$fromDate' AND '$toDate' and vl2.`user` = vl.`user`) as  answer,
 			(SELECT (SUM(val.talk_sec) - SUM(val.dead_sec)) as total_talk FROM vicidial_agent_log val WHERE val.event_time  BETWEEN '$fromDate' AND '$toDate' and val.`user` = vl.`user`) as total_talk,
 			COUNT(if( vdl.sip_hangup_cause in(183),vdl.lead_id, null)) as noanswer,
 			COUNT(if( vdl.sip_hangup_cause > 1500,vdl.lead_id, null)) as congestion,

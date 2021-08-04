@@ -80,6 +80,17 @@ if (isset($_GET['goIdentityIssuedOn'])) { $identity_issued_on = $astDB->escape($
     else if (isset($_POST['goIdentityIssuedOn'])) { $identity_issued_on = $astDB->escape($_POST['goIdentityIssuedOn']); }
 if (isset($_GET['goIdentityIssuedBy'])) { $identity_issued_by = $astDB->escape($_GET['goIdentityIssuedBy']); }
     else if (isset($_POST['goIdentityIssuedBy'])) { $identity_issued_by = $astDB->escape($_POST['goIdentityIssuedBy']); }
+	// 
+
+if (isset($_GET['goAltIdentityNumber'])) { $alt_identity_number = $astDB->escape($_GET['goAltIdentityNumber']); }
+    else if (isset($_POST['goAltIdentityNumber'])) { $alt_identity_number = $astDB->escape($_POST['goAltIdentityNumber']); }
+if (isset($_GET['goAltIdentityIssuedOn'])) { $alt_identity_issued_on = $astDB->escape($_GET['goAltIdentityIssuedOn']); }
+    else if (isset($_POST['goAltIdentityIssuedOn'])) { $alt_identity_issued_on = $astDB->escape($_POST['goAltIdentityIssuedOn']); }
+if (isset($_GET['goAltIdentityIssuedBy'])) { $alt_identity_issued_by = $astDB->escape($_GET['goAltIdentityIssuedBy']); }
+    else if (isset($_POST['goAltIdentityIssuedBy'])) { $alt_identity_issued_by = $astDB->escape($_POST['goAltIdentityIssuedBy']); }
+	// 
+
+
 if (isset($_GET['goPartnerCode'])) { $partner_code = $astDB->escape($_GET['goPartnerCode']); }
     else if (isset($_POST['goPartnerCode'])) { $partner_code = $astDB->escape($_POST['goPartnerCode']); }
 if (isset($_GET['goRequestId'])) { $request_id = $astDB->escape($_GET['goRequestId']); }
@@ -173,6 +184,11 @@ if ($is_logged_in) {
 				'identity_number' => $identity_number,
 				'identity_issued_on' => $identity_issued_on,
 				'identity_issued_by' => $identity_issued_by,
+				
+				'alt_identity_number' => $alt_identity_number,
+				'alt_identity_issued_on' => $alt_identity_issued_on,
+				'alt_identity_issued_by' => $alt_identity_issued_by,
+				
 				'partner_code' => $partner_code,
 				'request_id' => $request_id,
             );
@@ -186,6 +202,8 @@ if ($is_logged_in) {
 			//$stmt="UPDATE vicidial_list set vendor_lead_code='" . mysqli_real_escape_string($vendor_lead_code) . "', title='" . mysqli_real_escape_string($title) . "', first_name='" . mysqli_real_escape_string($first_name) . "', middle_initial='" . mysqli_real_escape_string($middle_initial) . "', last_name='" . mysqli_real_escape_string($last_name) . "', address1='" . mysqli_real_escape_string($address1) . "', address2='" . mysqli_real_escape_string($address2) . "', address3='" . mysqli_real_escape_string($address3) . "', city='" . mysqli_real_escape_string($city) . "', state='" . mysqli_real_escape_string($state) . "', province='" . mysqli_real_escape_string($province) . "', postal_code='" . mysqli_real_escape_string($postal_code) . "', country_code='" . mysqli_real_escape_string($country_code) . "', gender='" . mysqli_real_escape_string($gender) . "', date_of_birth='" . mysqli_real_escape_string($date_of_birth) . "', alt_phone='" . mysqli_real_escape_string($alt_phone) . "', email='" . mysqli_real_escape_string($email) . "', security_phrase='" . mysqli_real_escape_string($security_phrase) . "', comments='" . mysqli_real_escape_string($comments) . "' $phoneSQL where lead_id='$lead_id';";
             $astDB->where('lead_id', $lead_id);
             $rslt = $astDB->update('vicidial_list', $updateData);
+    		file_put_contents("LUANDEBUG.log",  "AAAAAAAAa\n", FILE_APPEND | LOCK_EX);
+    		file_put_contents("LUANDEBUG.log",  $astDB->getLastQuery(), FILE_APPEND | LOCK_EX);
 		}
 		
 		if ($system_settings->custom_fields_enabled > 0 && (isset($custom_fields) && strlen($custom_fields) > 0)) {
