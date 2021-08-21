@@ -367,7 +367,8 @@ if (empty($log_user) || is_null($log_user)) {
 			agent_call_log_view_override,
 			agent_choose_blended,
 			agent_lead_search_override,
-			preset_contact_search		
+			preset_contact_search,
+			dsa_code
 		";
 
 	$userinfo 									= $astDB
