@@ -297,15 +297,13 @@ if (($handle = fopen($csv_file, "r")) !== false)
                         'gmt_offset_now' => $gmt_offset,
                         'phone_code' => $phone_code,
                         'phone_number' => $phone_number,
-                        'title' => $title,
                         'first_name' => $first_name ,
-                        'middle_initial' => $middle_initial,
+                        'middle_initial' => $middle_initial ,
                         'last_name' => $last_name ,
                         'address1' => $address1,
                         'address2' => $address2,
                         'address3' => $address3,
                         'city' => $city,
-                        'state' => $state,
                         'province' => $province,
                         'postal_code' => $postal_code,
                         'country_code' => $country_code,
@@ -320,6 +318,7 @@ if (($handle = fopen($csv_file, "r")) !== false)
                         'identity_number' => $identity_number,
                         'identity_issued_on' => $identity_issued_on,
                         'identity_issued_by' => $identity_issued_by,
+                        'partner_code' => $partner_code,
                     );
                     $insertQuery = $astDB->insert('vicidial_list', $insertData);
                     $goLastInsertedLeadIDDUPSYS = $astDB->getInsertId();
@@ -431,15 +430,13 @@ if (($handle = fopen($csv_file, "r")) !== false)
                             'gmt_offset_now' => $gmt_offset,
                             'phone_code' => $phone_code,
                             'phone_number' => $phone_number,
-                            'title' => $title,
-                            'first_name' => $first_name,
+                            'first_name' => $first_name ,
                             'middle_initial' => $middle_initial ,
                             'last_name' => $last_name ,
                             'address1' => $address1,
                             'address2' => $address2,
                             'address3' => $address3,
                             'city' => $city,
-                            'state' => $state,
                             'province' => $province,
                             'postal_code' => $postal_code,
                             'country_code' => $country_code,
@@ -454,6 +451,7 @@ if (($handle = fopen($csv_file, "r")) !== false)
                             'identity_number' => $identity_number,
                             'identity_issued_on' => $identity_issued_on,
                             'identity_issued_by' => $identity_issued_by,
+                            'partner_code' => $partner_code,
                         );
                         $rsltGoQueryInsNotDUP = $astDB->insert('vicidial_list', $insertData);
                         $goLastInsertedLeadIDDUPCAMP = $astDB->getInsertId();
@@ -566,7 +564,6 @@ if (($handle = fopen($csv_file, "r")) !== false)
                         'gmt_offset_now' => $gmt_offset,
                         'phone_code' => $phone_code,
                         'phone_number' => $phone_number,
-                        'title' => $title,
                         'first_name' => $first_name ,
                         'middle_initial' => $middle_initial ,
                         'last_name' => $last_name ,
@@ -574,7 +571,6 @@ if (($handle = fopen($csv_file, "r")) !== false)
                         'address2' => $address2,
                         'address3' => $address3,
                         'city' => $city,
-                        'state' => $state,
                         'province' => $province,
                         'postal_code' => $postal_code,
                         'country_code' => $country_code,
@@ -589,6 +585,7 @@ if (($handle = fopen($csv_file, "r")) !== false)
                         'identity_number' => $identity_number,
                         'identity_issued_on' => $identity_issued_on,
                         'identity_issued_by' => $identity_issued_by,
+                        'partner_code' => $partner_code,
                     );
                     $rsltGoQueryInsDupList = $astDB->insert('vicidial_list', $insertData);
                     $goLastInsertedLeadIDDUPLIST = $astDB->getInsertId();
