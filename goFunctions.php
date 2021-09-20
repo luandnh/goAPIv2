@@ -1537,7 +1537,7 @@
             if ($aas_ct > 0) {
                 $aas_total = $aas_ct;
             }
-
+            // file_put_contents("QUANGDEBUG.log", $aDB->getLastQuery(), FILE_APPEND | LOCK_EX);
             //$stmt = "SELECT count(*) FROM vicidial_live_agents where user!='$user';";
             $aDB->where('user', $user, '!=');
             $rslt = $aDB->get('vicidial_live_agents');

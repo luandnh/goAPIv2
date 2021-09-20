@@ -90,7 +90,6 @@
 			$astDB->orderBy('campaign_id', 'desc');
 			$result 									= $astDB->get('vicidial_campaigns', NULL, $cols);		
 
-			file_put_contents("LUANDEBUG.log",$astDB->getLastQuery(), FILE_APPEND | LOCK_EX);
 			if ($astDB->count > 0) {
 				foreach ($result as $fresults){
 					$dataCampID[] 						= $fresults['campaign_id'];

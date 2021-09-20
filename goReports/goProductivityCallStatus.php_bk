@@ -116,10 +116,10 @@
 		// WHERE ".$campaign_sql." vl.call_date BETWEEN '$fromDate' AND '$toDate' or ( vl.user IN ('VDAD') and vl.list_id not in(998))  ".$bonus_sql."
 		// GROUP BY vl.user_group, vl.user";
 		$agent_report_query ="
-		SELECT DISTINCT vl.user_group,vl.user,
-			(SELECT COUNT(vl2.lead_id) as total_call from vicidial_log vl2 WHERE vl2.call_date  BETWEEN '$fromDate' AND '$toDate' and vl2.`user` = vl.`user`) as total_call,
-			(SELECT COUNT(if( vl2.length_in_sec>0, vl2.lead_id, null)) as answer from vicidial_log vl2 WHERE vl2.call_date  BETWEEN '$fromDate' AND '$toDate' and vl2.`user` = vl.`user`) as  answer,
-			(SELECT (SUM(val.talk_sec) - SUM(val.dead_sec)) as total_talk FROM vicidial_agent_log val WHERE val.event_time  BETWEEN '$fromDate' AND '$toDate' and val.`user` = vl.`user`) as total_talk,
+		SELECT DISTINCT vl.user_group,vl.user,DATE(vl.call_date) as perday,
+			(SELECT COUNT(vl2.lead_id) as total_call from vicidial_log vl2 WHERE DATE(vl.call_date) = DATE(vl2.call_date) and vl2.`user` = vl.`user`) as total_call,
+			(SELECT COUNT(if( vl2.length_in_sec>0, vl2.lead_id, null)) as answer from vicidial_log vl2 WHERE DATE(vl.call_date) = DATE(vl2.call_date) and vl2.`user` = vl.`user`) as  answer,
+			(SELECT (SUM(val.talk_sec) - SUM(val.dead_sec)) as total_talk FROM vicidial_agent_log val WHERE DATE(vl.call_date) = DATE(val.event_time) and val.`user` = vl.`user`) as total_talk,
 			COUNT(if( vdl.sip_hangup_cause in(183),vdl.lead_id, null)) as noanswer,
 			COUNT(if( vdl.sip_hangup_cause > 1500,vdl.lead_id, null)) as congestion,
 			COUNT(if( vdl.sip_hangup_cause in(486,480),vdl.lead_id, null)) as busy,
@@ -130,24 +130,22 @@
 			FROM vicidial_log vl INNER JOIN vicidial_dial_log vdl on  ((FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid)) or (FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid)-1)  or (FLOOR(vl.uniqueid) = FLOOR(vdl.uniqueid) + 1)) and vl.lead_id = vdl.lead_id
 
 			WHERE $campaign_sql vl.call_date BETWEEN '$fromDate' AND '$toDate'
-			GROUP BY vl.user_group, vl.user
-			ORDER BY vl.user_group DESC
+			GROUP BY vl.user_group, vl.user, DATE(vl.call_date)
+			ORDER BY vl.user DESC
 		";
 		
 			// JOIN vicidial_users  vu on (vu.user_group = vl.user_group or vl.user IN ('VDAD'))  and vu.USER = vl.user
 		// Nho bo comment 131
 		//  AND vdl.sip_hangup_cause not in (100)
 		$query 										= $astDB->rawQuery($agent_report_query);
-		// $origin = new DateTime($fromDate);
-		// $target = new DateTime($toDate);
-		// $interval = $origin->diff($target);
-        // file_put_contents("QUANGBUG.log", $fromDate . "hihihi ".$toDate." ", FILE_APPEND | LOCK_EX);
+        file_put_contents("QUANGBUG.log", $agent_report_query, FILE_APPEND | LOCK_EX);
 		$TOPsorted_output 							= "";
 		$number 									= 1;
 		foreach ($query as $row) {
 			$TOPsorted_output[] 					.= '<tr>';
 			$TOPsorted_output[] 					.= '<td nowrap>'.$row['user_group'].'</td>';
 			$TOPsorted_output[] 					.= '<td nowrap>'.$row['user'].'</td>';
+			$TOPsorted_output[] 					.= '<td nowrap>'.$row['perday'].'</td>';
 			$TOPsorted_output[] 					.= '<td nowrap>'.$row['total_call'].'</td>';
 			$TOPsorted_output[] 					.= '<td nowrap>'.$row['answer'].'</td>';
 			$TOPsorted_output[] 					.= '<td nowrap>'.convert($row['total_talk']).'</td>';
