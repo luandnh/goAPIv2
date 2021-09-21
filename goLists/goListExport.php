@@ -103,7 +103,8 @@
 			$u											= 0;
 			$x											= 0;
 			$count_header 								= count($header);
-
+			
+            // file_put_contents("QUANGBUG.log", $stmt, FILE_APPEND | LOCK_EX);
 			foreach ($dllist as $fetch_row) {
 				$array_fetch 							= $fetch_row[$header[0]];
 				$u 										= $u + 1;
