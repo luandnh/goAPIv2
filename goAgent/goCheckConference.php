@@ -191,7 +191,7 @@ if( (strlen($session_name) < 12) or (!isset($session_name)) ) {
                         if ( ($AcalleridCOUNT < 1) and (preg_match("/INCALL/i", $Astatus)) and (strlen($Aagent_log_id) > 0) ) {
                             $DEADcustomer++;
                             ### find whether the agent log record has already logged DEAD
-                            $rslt = $astDB->rawQuery("SELECT count(*) AS cnt FROM vicidial_agent_log WHERE agent_log_id='$Aagent_log_id' AND ( (dead_epoch IS NOT NULL) OR (dead_epoch > 10000) );");
+                            $rslt = $astDB->rawQuery("SELECT count(agent_log_id) AS cnt FROM vicidial_agent_log WHERE agent_log_id='$Aagent_log_id' AND ( (dead_epoch IS NOT NULL) OR (dead_epoch > 10000) );  LIMIT 1");
                             $Aagent_log_idCOUNT = $rslt[0]['cnt'];
                             
                             if ($Aagent_log_idCOUNT < 1) {
@@ -239,7 +239,7 @@ if( (strlen($session_name) < 12) or (!isset($session_name)) ) {
                         if ( ($AcalleridCOUNT < 1) and (preg_match("/INCALL/i", $Astatus)) and (strlen($Aagent_log_id) > 0) ) {
                             $DEADcustomer++;
                             ### find whether the agent log record has already logged DEAD
-                            $rslt = $astDB->rawQuery("SELECT count(*) AS cnt FROM vicidial_agent_log WHERE agent_log_id='$Aagent_log_id' AND ( (dead_epoch IS NOT NULL) OR (dead_epoch > 10000) );");
+                            $rslt = $astDB->rawQuery("SELECT count(agent_log_id) AS cnt FROM vicidial_agent_log WHERE agent_log_id='$Aagent_log_id' AND ( (dead_epoch IS NOT NULL) OR (dead_epoch > 10000) ); LIMIT 1");
                             $Aagent_log_idCOUNT = $rslt[0]['cnt'];
                             
                             if ($Aagent_log_idCOUNT < 1) {

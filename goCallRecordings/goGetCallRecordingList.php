@@ -70,7 +70,7 @@ if (empty($goUser) || is_null($goUser)) {
 		if ($tenant) {
 			$astDB->where("vl.user_group", $log_group);
 		} else {
-			if (strtoupper($log_group) != 'ADMIN') {
+			if (strtoupper($log_group) != 'ADMIN' and strtoupper($log_group) != 'GroupIT') {
 				if ($userlevel > 8) {
 					$astDB->where("vl.user_group", $log_group);
 				} else {
