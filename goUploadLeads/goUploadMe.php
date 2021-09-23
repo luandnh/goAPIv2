@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 include_once ("goAPI.php");
-
+const DEFAULT_FIELD_COUNT = 24;
 ini_set('memory_limit', '2048M');
 ini_set('upload_max_filesize', '600M');
 ini_set('post_max_size', '600M');
@@ -67,15 +67,19 @@ $duplicates = 0;
 //die($theList."<br>".$thefile."<br>".$csv_file);
 if (($handle = fopen($csv_file, "r")) !== false)
 {
+    // TEST
+    // $list_id = "997";
+    // $theList = "997";
+    // END TEST
     $getHeder = fgetcsv($handle);
     //$goInsertSuccess = 0;
     //$array 21 last column
     //for custom fields start GLOBAL varaibles
     $goCountTheHeader = count($getHeder);
 
-    if ($goCountTheHeader > 24 && !empty($lead_mapping))
+    if ($goCountTheHeader > DEFAULT_FIELD_COUNT && !empty($lead_mapping))
     {
-        for ($x = 21;$x < count($getHeder);$x++)
+        for ($x = DEFAULT_FIELD_COUNT;$x < count($getHeder);$x++)
         {
             $goGetLastHeader .= $x . ","; #get digits for specific data
             $goGetLastCustomFiledsName .= $getHeder[$x] . ","; #get the digits for specific custom field
@@ -88,9 +92,9 @@ if (($handle = fopen($csv_file, "r")) !== false)
         $goGetLastCustomFiledsName2 = explode(",", $goGetLastCustomFiledsName);
 
     }
-    elseif ($goCountTheHeader > 24)
+    elseif ($goCountTheHeader > DEFAULT_FIELD_COUNT)
     {
-        for ($x = 21;$x < count($getHeder);$x++)
+        for ($x = DEFAULT_FIELD_COUNT;$x < count($getHeder);$x++)
         {
             $goGetLastHeader .= $x . ","; #get digits for specific data
             $goGetLastCustomFiledsName .= $getHeder[$x] . ","; #get the digits for specific custom field
@@ -162,7 +166,9 @@ if (($handle = fopen($csv_file, "r")) !== false)
         $partner_code = preg_replace($field_regx, "", $col[22]);
         $entry_list_id = 0;
         $called_since_last_reset = "N";
-
+        // TEST
+        // $lead_mapping = "YES";
+        // END TEST
         // LEAD MAPPING -- CUSTOMIZATION!!!!!
         if (!empty($lead_mapping))
         {
@@ -297,15 +303,13 @@ if (($handle = fopen($csv_file, "r")) !== false)
                         'gmt_offset_now' => $gmt_offset,
                         'phone_code' => $phone_code,
                         'phone_number' => $phone_number,
-                        'title' => $title,
                         'first_name' => $first_name ,
-                        'middle_initial' => $middle_initial,
+                        'middle_initial' => $middle_initial ,
                         'last_name' => $last_name ,
                         'address1' => $address1,
                         'address2' => $address2,
                         'address3' => $address3,
                         'city' => $city,
-                        'state' => $state,
                         'province' => $province,
                         'postal_code' => $postal_code,
                         'country_code' => $country_code,
@@ -320,6 +324,7 @@ if (($handle = fopen($csv_file, "r")) !== false)
                         'identity_number' => $identity_number,
                         'identity_issued_on' => $identity_issued_on,
                         'identity_issued_by' => $identity_issued_by,
+                        'partner_code' => $partner_code,
                     );
                     $insertQuery = $astDB->insert('vicidial_list', $insertData);
                     $goLastInsertedLeadIDDUPSYS = $astDB->getInsertId();
@@ -431,15 +436,13 @@ if (($handle = fopen($csv_file, "r")) !== false)
                             'gmt_offset_now' => $gmt_offset,
                             'phone_code' => $phone_code,
                             'phone_number' => $phone_number,
-                            'title' => $title,
-                            'first_name' => $first_name,
+                            'first_name' => $first_name ,
                             'middle_initial' => $middle_initial ,
                             'last_name' => $last_name ,
                             'address1' => $address1,
                             'address2' => $address2,
                             'address3' => $address3,
                             'city' => $city,
-                            'state' => $state,
                             'province' => $province,
                             'postal_code' => $postal_code,
                             'country_code' => $country_code,
@@ -454,7 +457,9 @@ if (($handle = fopen($csv_file, "r")) !== false)
                             'identity_number' => $identity_number,
                             'identity_issued_on' => $identity_issued_on,
                             'identity_issued_by' => $identity_issued_by,
+                            'partner_code' => $partner_code,
                         );
+                        // QUANG - INSERT CUSTOM_FIELD
                         $rsltGoQueryInsNotDUP = $astDB->insert('vicidial_list', $insertData);
                         $goLastInsertedLeadIDDUPCAMP = $astDB->getInsertId();
 
@@ -566,7 +571,6 @@ if (($handle = fopen($csv_file, "r")) !== false)
                         'gmt_offset_now' => $gmt_offset,
                         'phone_code' => $phone_code,
                         'phone_number' => $phone_number,
-                        'title' => $title,
                         'first_name' => $first_name ,
                         'middle_initial' => $middle_initial ,
                         'last_name' => $last_name ,
@@ -574,7 +578,6 @@ if (($handle = fopen($csv_file, "r")) !== false)
                         'address2' => $address2,
                         'address3' => $address3,
                         'city' => $city,
-                        'state' => $state,
                         'province' => $province,
                         'postal_code' => $postal_code,
                         'country_code' => $country_code,
@@ -589,6 +592,7 @@ if (($handle = fopen($csv_file, "r")) !== false)
                         'identity_number' => $identity_number,
                         'identity_issued_on' => $identity_issued_on,
                         'identity_issued_by' => $identity_issued_by,
+                        'partner_code' => $partner_code,
                     );
                     $rsltGoQueryInsDupList = $astDB->insert('vicidial_list', $insertData);
                     $goLastInsertedLeadIDDUPLIST = $astDB->getInsertId();
@@ -745,7 +749,7 @@ if (($handle = fopen($csv_file, "r")) !== false)
                     $rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
 
                 }
-                elseif ($goCountTheHeader > 21)
+                elseif ($goCountTheHeader > DEFAULT_FIELD_COUNT)
                 {
                     $goShowCustomFields = "DESC custom_$list_id;";
                     $rsltgoShowCustomFields = $astDB->rawQuery($goShowCustomFields);
@@ -858,15 +862,18 @@ function goCheckCustomFieldsName($link, $goCClistID, $gocustomFieldsCSV)
     //$goSQLCheckFieldsCustom = "SELECT $gocustomFieldsCSV FROM custom_$goCClistID;";
     $goCustomCheckQuery = "SELECT EXISTS(SELECT $gocustomFieldsCSV FROM custom_$goCClistID)";
     $customCheck = $link->rawQuery($goCustomCheckQuery);
-    $countCustomCheck = $link->getRowCount();
+    // QUANG - KHÔNG HIỂU LOGIC CHECK
+    // LOGIC CŨ : COUNT ROWS KHI SELECT FIELD NAME
+    // LOGIC MỚI: CHECK ERROR
+    // $countCustomCheck = $link->getRowCount();
 
-    if ($countCustomCheck === 0)
-    {
-        return "error";
-    }
-    $rsltSQLCHECK = $link->get("custom_$goCClistID", null, "$gocustomFieldsCSV");
+    // if ($countCustomCheck === 0)
+    // {
+    //     return "error";
+    // }
+    // $rsltSQLCHECK = $link->get("custom_$goCClistID", null, "$gocustomFieldsCSV");
 
-    if (!$rsltSQLCHECK)
+    if (!$customCheck)
     {
         $goRetMessage = "error";
     }
