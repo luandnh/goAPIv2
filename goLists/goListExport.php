@@ -79,7 +79,7 @@
 
 				foreach ($cllist as $clrow) {
 					if ($clrow['Field'] != 'lead_id') {
-						$header_columns 				.= "," . $clrow['Field'];
+						$header_columns 				.= "," . "ct.".$clrow['Field'];
 					}
 				}
 
@@ -92,9 +92,9 @@
 			}
 
 			if ($added_custom_SQL3 != "") {
-				$stmt 									= "SELECT vl.lead_id AS lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner{$header_columns} FROM vicidial_list vl LEFT OUTER JOIN {$added_custom_SQL3} ON {$added_custom_SQL4} WHERE vl.list_id='{$list_id}' LIMIT {$limit} OFFSET {$offset};";
+				$stmt 									= "SELECT vl.lead_id AS lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,vl.phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner{$header_columns} FROM vicidial_list vl LEFT OUTER JOIN {$added_custom_SQL3} ON {$added_custom_SQL4} WHERE vl.list_id='{$list_id}' LIMIT {$limit} OFFSET {$offset};";
 			} else {
-				$stmt 									= "SELECT lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner FROM vicidial_list WHERE list_id='$list_id' LIMIT {$limit} OFFSET {$offset};";
+				$stmt 									= "SELECT lead_id,entry_date,modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,vl.phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,last_local_call_time,rank,owner FROM vicidial_list vl WHERE list_id='$list_id' LIMIT {$limit} OFFSET {$offset};";
 			}
 
 			$dllist 									= $astDB->rawQuery($stmt);
@@ -104,7 +104,10 @@
 			$x											= 0;
 			$count_header 								= count($header);
 			
-            // file_put_contents("QUANGBUG.log", $stmt, FILE_APPEND | LOCK_EX);
+            file_put_contents("QUANGBUG.log", $header_columns."\n", FILE_APPEND | LOCK_EX);
+            file_put_contents("QUANGBUG.log", $added_custom_SQL3."\n", FILE_APPEND | LOCK_EX);
+            file_put_contents("QUANGBUG.log", $added_custom_SQL4."\n", FILE_APPEND | LOCK_EX);
+            file_put_contents("QUANGBUG.log", $stmt ."\n", FILE_APPEND | LOCK_EX);
 			foreach ($dllist as $fetch_row) {
 				$array_fetch 							= $fetch_row[$header[0]];
 				$u 										= $u + 1;

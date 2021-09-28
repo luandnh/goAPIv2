@@ -31,6 +31,7 @@
     $toDate 										= $astDB->escape($_REQUEST['toDate']);
     $userId 									= $astDB->escape($_REQUEST['userId']);
     $userGroup 									= $astDB->escape($_REQUEST['userGroup']);
+    $listID 									= $astDB->escape($_REQUEST['listID']);
     
     if (empty($fromDate)) {
         $fromDate 									= date("Y-m-d")." 00:00:00";
@@ -71,6 +72,10 @@
         //     }
 	    // }
 		// 
+		
+	    if (!empty($listID) && $listID != "ALL") {
+			$bonus_sql .= " and vl.list_id = $listID ";
+		}
 	    if (!empty($userGroup) && $userGroup != "ALL") {
 			$user_groups = array();
 			$SELECTQuery = $astDB->rawQuery("Select sub_user_group from vicidial_sub_user_groups where user_group='".$userGroup."'");
@@ -88,7 +93,6 @@
 			}
 			$users_string  = implode("','",$users);
 			$bonus_sql .= " and vl.user  IN ('$users_string') ";
-			
 	    }
 		// file_put_contents("QUANGBUG.log","SQL WHERE:".$bonus_sql, FILE_APPEND | LOCK_EX);
 		// check if MariaDB slave server available
@@ -110,41 +114,55 @@
 		}
 		$appstatus_report_query = "
 			SELECT
-				vl.user,
-				COUNT( CASE WHEN vlf.app_status = 'SENT' THEN 1 END ) AS SENT,
-				COUNT( CASE WHEN vlf.app_status = 'FAIL_EKYC' THEN 1 END ) AS FAIL_EKYC,
-				COUNT( CASE WHEN vlf.app_status = 'FAIL_MANUAL_KYC' THEN 1 END ) AS FAIL_MANUAL_KYC,
-				COUNT( CASE WHEN vlf.app_status = 'VALIDATED' THEN 1 END ) AS VALIDATED,
-				COUNT( CASE WHEN vlf.app_status = 'REJECTED' THEN 1 END ) AS REJECTED,
-				COUNT( CASE WHEN vlf.app_status = 'APPROVED' THEN 1 END ) AS APPROVED,
-				COUNT( CASE WHEN vlf.app_status = 'SIGNED' THEN 1 END ) AS SIGNED,
-				COUNT( CASE WHEN vlf.app_status = 'ACTIVATED' THEN 1 END ) AS ACTIVATED,
-				COUNT( CASE WHEN vlf.app_status = 'TERMINATED' THEN 1 END ) AS TERMINATE,
-				COUNT( CASE WHEN vlf.app_status = 'VOLUME_DISBURSED' THEN 1 END ) AS VOLUME_DISBURSED
+			vl.list_id,
+				vlf.partner_code, 
+				vlf.request_id, 
+				vlf.lead_id, 
+				vlf.created_at, 
+				vlf.updated_at, 
+				vlf.reject_reason,
+				rj.description,
+				vlf.app_status, 
+				vlf.loan_amount, 
+				vlf.product_name, 
+				vlf.proposal_id, 
+				vl.`user`, vu.user_group as usergroup,vl.identity_number, vl.phone_number
 			FROM
-				vicidial_list_full_loan vlf join vicidial_list vl on vlf.lead_id = vl.lead_id
+				vicidial_list_full_loan AS vlf
+				JOIN
+				vicidial_list AS vl
+				ON 
+					vlf.lead_id = vl.lead_id
+				JOIN vicidial_users vu ON vl.USER = vu.user
+			LEFT JOIN  reject_reason rj on rj.reject_reason = vlf.reject_reason
 			WHERE
-				vlf.updated_at BETWEEN '$fromDate' and '$toDate' $bonus_sql
-			GROUP BY
-				vl.user;
-		";
+				vlf.updated_at BETWEEN '$fromDate' AND '$toDate' and vlf.app_status NOT IN ('') $bonus_sql
+				ORDER BY vlf.updated_at
+				";
+				
 		$query 										= $astDB->rawQuery($appstatus_report_query);
-        // file_put_contents("QUANGBUG.log","\n".$appstatus_report_query, FILE_APPEND | LOCK_EX);
+        file_put_contents("QUANGBUG.log","\n".$appstatus_report_query, FILE_APPEND | LOCK_EX);
 		$TOPsorted_output 							= "";
 		$number 									= 1;
 		foreach ($query as $row) {
 			$TOPsorted_output[] 					.= '<tr>';
+			$TOPsorted_output[] .= '<td nowrap>'.$row['lead_id'].'</td>';
+			$TOPsorted_output[] .= '<td nowrap>'.$row['request_id'].'</td>';
 			$TOPsorted_output[] .= '<td nowrap>'.$row['user'].'</td>';
-			$TOPsorted_output[] .= '<td nowrap>'.$row['SENT'].'</td>';
-			$TOPsorted_output[] .= '<td nowrap>'.$row['FAIL_EKYC'].'</td>';
-			$TOPsorted_output[] .= '<td nowrap>'.$row['FAIL_MANUAL_KYC'].'</td>';
-			$TOPsorted_output[] .= '<td nowrap>'.$row['VALIDATED'].'</td>';
-			$TOPsorted_output[] .= '<td nowrap>'.$row['REJECTED'].'</td>';
-			$TOPsorted_output[] .= '<td nowrap>'.$row['APPROVED'].'</td>';
-			$TOPsorted_output[] .= '<td nowrap>'.$row['SIGNED'].'</td>';
-			$TOPsorted_output[] .= '<td nowrap>'.$row['ACTIVATED'].'</td>';
-			$TOPsorted_output[] .= '<td nowrap>'.$row['TERMINATE'].'</td>';
-			$TOPsorted_output[] .= '<td nowrap>'.$row['VOLUME_DISBURSED'].'</td>';
+			$TOPsorted_output[] .= '<td nowrap>'.$row['usergroup'].'</td>';
+			$TOPsorted_output[] .= '<td nowrap>'.$row['list_id'].'</td>';
+			$TOPsorted_output[] .= '<td nowrap>'.$row['created_at'].'</td>';
+			$TOPsorted_output[] .= '<td nowrap>'.$row['updated_at'].'</td>';
+			$TOPsorted_output[] .= '<td nowrap>'.$row['phone_number'].'</td>';
+			$TOPsorted_output[] .= '<td nowrap>'.$row['identity_number'].'</td>';
+			$TOPsorted_output[] .= '<td nowrap>'.$row['app_status'].'</td>';
+			$TOPsorted_output[] .= '<td nowrap>'.$row['reject_reason'].'</td>';
+			$TOPsorted_output[] .= '<td nowrap>'.$row['description'].'</td>';
+			$TOPsorted_output[] .= '<td nowrap>'.$row['product_name'].'</td>';
+			$TOPsorted_output[] .= '<td nowrap>'.$row['loan_amount'].'</td>';
+			$TOPsorted_output[] .= '<td nowrap>'.$row['proposal_id'].'</td>';
+			$TOPsorted_output[] .= '<td nowrap><button type="button" tag="btn_detail" lead_id="'.$row['lead_id'].'" request_id="'.$row['request_id'].'" class="btn btn-block btn-info btn-sm">Chi tiết</button></td>';
+			// $TOPsorted_output[] .= '<td nowrap>'.$row['document'].'</td>';
 			$TOPsorted_output[] 					.= '</tr>';
 		}
 
@@ -157,4 +175,3 @@
 
 		return $apiresults;
 	}
-?>
