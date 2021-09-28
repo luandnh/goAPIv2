@@ -36,9 +36,12 @@ if (isset($_GET['goAutoDialLevel'])) { $auto_dial_level = $astDB->escape($_GET['
     else if (isset($_POST['goAutoDialLevel'])) { $auto_dial_level = $astDB->escape($_POST['goAutoDialLevel']); }
 if (isset($_GET['goCampAgentDisp'])) { $campagentstdisp = $astDB->escape($_GET['goCampAgentDisp']); }
     else if (isset($_POST['goCampAgentDisp'])) { $campagentstdisp = $astDB->escape($_POST['goCampAgentDisp']); }
-
 # default optional vars if not set
-if (strlen($ACTION) < 1) {$ACTION = "refresh";}
+
+$ACTION = "";
+$api_manual_dial = "";
+if (strlen($ACTION) < 1) {
+    $ACTION = "refresh";}
 //if (strlen($client) < 1) {$client = "agc";}
 if (strlen($client) < 1) {$client = "vdc";}
 
@@ -53,7 +56,7 @@ $FILE_TIME = date("Ymd_His");
 if (!isset($query_date)) {$query_date = $NOW_DATE;}
 $random = (rand(1000000, 9999999) + 10000000);
 $error_catched = 0;
-
+$channels_list = 0;
 $server_ip = $phone_settings->server_ip;
 $user = $agent->user;
 

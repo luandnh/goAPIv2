@@ -24,7 +24,7 @@
 //error_reporting(E_ALL);
 
 $webRoot = $_SERVER['DOCUMENT_ROOT'];
-$version = file_get_contents("{$webRoot}/version.txt");
+// $version = file_get_contents("{$webRoot}/version.txt");
 $goCharset = "UTF-8";
 $goVersion = "4.0";
 
@@ -106,8 +106,7 @@ $FILE_TIME = date("Ymd-His");
 $loginDATE = date("Ymd");
 $CIDdate = date("mdHis");
 $ENTRYdate = date("YmdHis");
-
-if ($_REQUEST['debugX']) {
+if (isset($_REQUEST['debugX'])){
     var_dump($NOW_TIME, $tz);
     die();
 }
