@@ -104,10 +104,9 @@
 			$x											= 0;
 			$count_header 								= count($header);
 			
-            file_put_contents("QUANGBUG.log", $header_columns."\n", FILE_APPEND | LOCK_EX);
-            file_put_contents("QUANGBUG.log", $added_custom_SQL3."\n", FILE_APPEND | LOCK_EX);
-            file_put_contents("QUANGBUG.log", $added_custom_SQL4."\n", FILE_APPEND | LOCK_EX);
-            file_put_contents("QUANGBUG.log", $stmt ."\n", FILE_APPEND | LOCK_EX);
+            // file_put_contents("QUANGBUG.log", $header_columns."\n", FILE_APPEND | LOCK_EX);
+            // file_put_contents("QUANGBUG.log", $added_custom_SQL3."\n", FILE_APPEND | LOCK_EX);
+            // file_put_contents("QUANGBUG.log", $added_custom_SQL4."\n", FILE_APPEND | LOCK_EX);
 			foreach ($dllist as $fetch_row) {
 				$array_fetch 							= $fetch_row[$header[0]];
 				$u 										= $u + 1;

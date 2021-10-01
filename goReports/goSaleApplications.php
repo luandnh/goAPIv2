@@ -32,6 +32,7 @@
     $userId 									= $astDB->escape($_REQUEST['userId']);
     $userGroup 									= $astDB->escape($_REQUEST['userGroup']);
     $listID 									= $astDB->escape($_REQUEST['listID']);
+    $leadCode 									= $astDB->escape($_REQUEST['leadCode']);
     
     if (empty($fromDate)) {
         $fromDate 									= date("Y-m-d")." 00:00:00";
@@ -72,6 +73,10 @@
         //     }
 	    // }
 		// 
+		
+	    if (!empty($leadCode) && $leadCode != "ALL") {
+			$bonus_sql .= " and vl.vendor_lead_code = '$leadCode' ";
+		}
 		
 	    if (!empty($listID) && $listID != "ALL") {
 			$bonus_sql .= " and vl.list_id = $listID ";
@@ -118,14 +123,15 @@
 				vlf.partner_code, 
 				vlf.request_id, 
 				vlf.lead_id, 
-				vlf.created_at, 
-				vlf.updated_at, 
+				date_format(vlf.created_at, '%Y-%m-%d %H:%i:%s') as created_at, 
+				date_format(vlf.updated_at, '%Y-%m-%d %H:%i:%s') as updated_at, 
 				vlf.reject_reason,
 				rj.description,
 				vlf.app_status, 
 				vlf.loan_amount, 
 				vlf.product_name, 
-				vlf.proposal_id, 
+				vlf.proposal_id,
+				vl.vendor_lead_code, 
 				vl.`user`, vu.user_group as usergroup,vl.identity_number, vl.phone_number
 			FROM
 				vicidial_list_full_loan AS vlf
@@ -140,8 +146,9 @@
 				ORDER BY vlf.updated_at
 				";
 				
+		// LEFT JOIN vicidial_vicidial_call_notes vcn pn vl.lead_id = vcn.lead_id
 		$query 										= $astDB->rawQuery($appstatus_report_query);
-        file_put_contents("QUANGBUG.log","\n".$appstatus_report_query, FILE_APPEND | LOCK_EX);
+        // file_put_contents("QUANGBUG.log","\n".$appstatus_report_query, FILE_APPEND | LOCK_EX);
 		$TOPsorted_output 							= "";
 		$number 									= 1;
 		foreach ($query as $row) {
@@ -150,7 +157,7 @@
 			$TOPsorted_output[] .= '<td nowrap>'.$row['request_id'].'</td>';
 			$TOPsorted_output[] .= '<td nowrap>'.$row['user'].'</td>';
 			$TOPsorted_output[] .= '<td nowrap>'.$row['usergroup'].'</td>';
-			$TOPsorted_output[] .= '<td nowrap>'.$row['list_id'].'</td>';
+			$TOPsorted_output[] .= '<td nowrap>'.$row['vendor_lead_code'].'</td>';
 			$TOPsorted_output[] .= '<td nowrap>'.$row['created_at'].'</td>';
 			$TOPsorted_output[] .= '<td nowrap>'.$row['updated_at'].'</td>';
 			$TOPsorted_output[] .= '<td nowrap>'.$row['phone_number'].'</td>';

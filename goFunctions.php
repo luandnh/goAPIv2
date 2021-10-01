@@ -2033,5 +2033,12 @@
 
     function _remove_empty_internal($value) {
 		return !empty($value) || $value === 0;
-    }	
+    }
+    function go_logger($data, $path="go_debug.log"){
+        $fh = fopen( $path, 'a') or die("Can't open file.");
+        $results = print_r($data, true);
+        fwrite($fh, $results);
+        fwrite($fh, "\n");
+        fclose($fh);
+    }
 ?>
