@@ -57,7 +57,14 @@ if (!empty($_REQUEST["custom_delimiter"]) && isset($_REQUEST["custom_delimiter"]
     $str1 = str_replace($delimiters, $default_delimiter, $str);
     file_put_contents($csv_file, $str1);
 }
-
+// GET CAMPAIGN
+$campain_id = "";
+$astDB->where('list_id', $theList);
+$listCampaigns = $astDB->get('vicidial_lists', null, 'campaign_id');
+for ($i = 0;$i < count($listCampaigns);$i++){
+    $campain_id = $listCampaigns[$i]['campaign_id'];
+}
+// 
 // REGEX to prevent weird characters from ending up in the fields
 $field_regx = "/['\"`\\;]/";
 $field_regx = str_replace($delimiters, "", $field_regx);
@@ -328,7 +335,21 @@ if (($handle = fopen($csv_file, "r")) !== false)
                     );
                     $insertQuery = $astDB->insert('vicidial_list', $insertData);
                     $goLastInsertedLeadIDDUPSYS = $astDB->getInsertId();
-
+                    if ($campain_id != "" &&  $vendor_lead_code != "VGA"  &&  $vendor_lead_code != "" )
+                    {
+                        $inserthopper =  array(
+                            'lead_id' => $goLastInsertedLeadIDDUPSYS,
+                            'status' => "READY",
+                            'vendor_lead_code' => $vendor_lead_code,
+                            'list_id' => $list_id,
+                            'gmt_offset_now' => $gmt_offset,
+                            'campaign_id' => $campain_id,
+                            'alt_dial' => "NONE" ,
+                            'priority' => $list_id ,
+                            'source' => "S" 
+                        );
+                        $astDB->insert('vicidial_hopper', $inserthopper);
+                    }
                     # start set query for custom fields
                     if (!empty($lead_mapping) && !empty($custom_array))
                     { // LEAD MAPPING CUSTOMIZATION
@@ -462,7 +483,21 @@ if (($handle = fopen($csv_file, "r")) !== false)
                         // QUANG - INSERT CUSTOM_FIELD
                         $rsltGoQueryInsNotDUP = $astDB->insert('vicidial_list', $insertData);
                         $goLastInsertedLeadIDDUPCAMP = $astDB->getInsertId();
-
+                        if ($campain_id != "" &&  $vendor_lead_code != "VGA"  &&  $vendor_lead_code != "" )
+                        {
+                            $inserthopper =  array(
+                                'lead_id' => $goLastInsertedLeadIDDUPCAMP,
+                                'status' => "READY",
+                                'vendor_lead_code' => $vendor_lead_code,
+                                'list_id' => $list_id,
+                                'gmt_offset_now' => $gmt_offset,
+                                'campaign_id' => $campain_id,
+                                'alt_dial' => "NONE" ,
+                                'priority' => $list_id ,
+                                'source' => "S" 
+                            );
+                            $astDB->insert('vicidial_hopper', $inserthopper);
+                        }
                         # start set query for custom fields
                         if (!empty($lead_mapping) && !empty($custom_array))
                         { // LEAD MAPPING CUSTOMIZATION
@@ -594,8 +629,24 @@ if (($handle = fopen($csv_file, "r")) !== false)
                         'identity_issued_by' => $identity_issued_by,
                         'partner_code' => $partner_code,
                     );
+                   
                     $rsltGoQueryInsDupList = $astDB->insert('vicidial_list', $insertData);
                     $goLastInsertedLeadIDDUPLIST = $astDB->getInsertId();
+                    if ($campain_id != "" &&  $vendor_lead_code != "VGA"  &&  $vendor_lead_code != "" )
+                    {
+                        $inserthopper =  array(
+                            'lead_id' => $goLastInsertedLeadIDDUPLIST,
+                            'status' => "READY",
+                            'vendor_lead_code' => $vendor_lead_code,
+                            'list_id' => $list_id,
+                            'gmt_offset_now' => $gmt_offset,
+                            'campaign_id' => $campain_id,
+                            'alt_dial' => "NONE" ,
+                            'priority' => $list_id ,
+                            'source' => "S" 
+                        );
+                        $astDB->insert('vicidial_hopper', $inserthopper);
+                    }
                     $alex["insertquery"] = $astDB->getLastQuery();
                     # start set query for custom fields
                     if (!empty($lead_mapping) && !empty($custom_array))
@@ -718,7 +769,21 @@ if (($handle = fopen($csv_file, "r")) !== false)
                 );
                 $rsltGoQueryIns = $astDB->insert('vicidial_list', $insertData);
                 $goLastInsertedLeadIDNODUP = $astDB->getInsertId();
-
+                if ($campain_id != "" &&  $vendor_lead_code != "VGA"  &&  $vendor_lead_code != "" )
+                {
+                    $inserthopper =  array(
+                        'lead_id' => $goLastInsertedLeadIDNODUP,
+                        'status' => "READY",
+                        'vendor_lead_code' => $vendor_lead_code,
+                        'list_id' => $list_id,
+                        'gmt_offset_now' => $gmt_offset,
+                        'campaign_id' => $campain_id,
+                        'alt_dial' => "NONE" ,
+                        'priority' => $list_id ,
+                        'source' => "S" 
+                    );
+                    $astDB->insert('vicidial_hopper', $inserthopper);
+                }
                 $alex["query_insert"] = $astDB->getLastQuery();
                 $alex["error_insert"] = $astDB->getLastError();
 
@@ -795,6 +860,7 @@ if (($handle = fopen($csv_file, "r")) !== false)
                 
             }
         } #end No Duplicate check
+
         //fclose($handle);
         $counter++;
     } #end while
