@@ -66,7 +66,6 @@
 		// LEFT JOIN vicidial_vicidial_call_notes vcn pn vl.lead_id = vcn.lead_id
         $astDB->where("username", $goUser);
 		$query = $astDB->get("vicidial_downloads");
-        file_put_contents("ExportList.log","\n"."asd", FILE_APPEND | LOCK_EX);
 		$TOPsorted_output 							= "";
 		$number 									= 1;
 		foreach ($query as $row) {

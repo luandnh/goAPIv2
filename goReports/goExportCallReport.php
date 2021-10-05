@@ -24,7 +24,6 @@
  */
 
 include_once("goAPI.php");
-
 $campaigns 		= $astDB->escape($_REQUEST['campaigns']);
 $inbounds 		= $astDB->escape($_REQUEST['inbounds']);
 $lists 			= $astDB->escape($_REQUEST['lists']);
@@ -279,7 +278,6 @@ if ($RUNcampaign > 0 && $RUNgroup < 1) {
 		$user_group_SQL $status_SQL_vl
 		";
 }
-// file_put_contents("QUANGBUG.log", $query, FILE_APPEND | LOCK_EX);
 if ($RUNgroup > 0 && $RUNcampaign < 1) {
 	$query	= "SELECT vcl.call_date, $duration_sql2 vcl.phone_number,vcl.status,vcl.user,vu.full_name,vcl.campaign_id,vi.vendor_lead_code,vi.source_id,vi.list_id,vi.gmt_offset_now,vi.phone_code,vi.title,	vi.first_name,vi.middle_initial,vi.last_name,vi.address1,vi.address2,vi.address3,vi.city,vi.state,vi.province,vi.postal_code,vi.country_code,vi.gender,vi.date_of_birth,vi.alt_phone,vi.email,vi.security_phrase,vi.comments,vcl.user_group,vcl.queue_seconds,vi.rank,vi.owner,vi.lead_id,vcl.closecallid, vcl.uniqueid,vi.entry_list_id 
 			FROM vicidial_users vu, vicidial_closer_log vcl, vicidial_list vi 
@@ -398,7 +396,7 @@ $updateUsergroup = $astDB->rawQuery("Update vicidial_log vl INNER JOIN vicidial_
 // 
 $result = $astDB->rawQuery($query);
 
-// file_put_contents("QUANGBUG.log", $query, FILE_APPEND | LOCK_EX);
+file_put_contents("QUANGBUG.log", $query, FILE_APPEND | LOCK_EX);
 //$apiresults = array ( "QUERY" => $query, "EXECUTED LAST" => $astDB->getLastQuery(), "ANY DATA" => $result);
 
 // CONVERT RETURN OF rawQuery to Arrays

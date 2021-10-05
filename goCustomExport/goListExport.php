@@ -23,11 +23,11 @@
  */
 
 ini_set('memory_limit', '2048M');
+const SAVE_FOLDER = "/var/www/html/downloads/";
 const BATCH = 50000;
 const LIMIT = 50000;
 $offset = 0;
 include_once("goAPI.php");
-const SAVE_FOLDER = "/var/www/html/downloads/";
 $list_id 											= $astDB->escape($_REQUEST["list_id"]);
 if (!isset($list_id) || $list_id == "") {
 	exit();
