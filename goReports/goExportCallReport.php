@@ -396,7 +396,7 @@ $updateUsergroup = $astDB->rawQuery("Update vicidial_log vl INNER JOIN vicidial_
 // 
 $result = $astDB->rawQuery($query);
 
-file_put_contents("QUANGBUG.log", $query, FILE_APPEND | LOCK_EX);
+
 //$apiresults = array ( "QUERY" => $query, "EXECUTED LAST" => $astDB->getLastQuery(), "ANY DATA" => $result);
 
 // CONVERT RETURN OF rawQuery to Arrays

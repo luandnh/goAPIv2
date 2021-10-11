@@ -34,7 +34,6 @@ if (isset($_GET['goUserID'])) { $user_id = $astDB->escape($_GET['goUserID']); }
     else if (isset($_POST['goUserID'])) { $user_id = $astDB->escape($_POST['goUserID']); }
 
 $user = (strlen($user_id) > 0) ? $user_id : $goUser;
-file_put_contents("quangdebug.log",$user  ."\n", FILE_APPEND | LOCK_EX);
 $astDB->where('user', $user);
 $astDB->where('campaign_id', $campaign);
 $astDB->where('status', array('INACTIVE', 'DEAD'), 'NOT IN');

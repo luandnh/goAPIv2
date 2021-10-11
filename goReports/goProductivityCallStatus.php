@@ -148,7 +148,7 @@
 		}else{
 			$string_time = $newformat1."_".$newformat2;
 		}
-        // file_put_contents("QUANGBUG.log", $fromDate . "hihihi ".$toDate." ", FILE_APPEND | LOCK_EX);
+
 		$TOPsorted_output 							= "";
 		$number 									= 1;
 		foreach ($query as $row) {

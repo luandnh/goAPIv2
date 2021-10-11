@@ -239,7 +239,7 @@ if (empty($goUser) || is_null($goUser)) {
 				->get("vicidial_agent_log val", 10000000, $cols);
 			$query_td = $astDB->getLastQuery();
 			$usercount = $astDB->getRowCount();
-			// file_put_contents("QUANGBUG.log", $astDB->getLastQuery(), FILE_APPEND | LOCK_EX);
+
 			$agenttotalcalls = $astDB
 				->where("date_format(vl.call_date, '%Y-%m-%d %H:%i:%s')", array($fromDate, $toDate), "BETWEEN")
 				->where("campaign_id", $array_camp, "IN")

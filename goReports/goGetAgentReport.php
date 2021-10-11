@@ -140,7 +140,7 @@
 		// (SELECT Count(vli.lead_id) FROM vicidial_list as vli WHERE vli.STATUS != 'NEW' and vu.user = vli.user)as total_call3 
 		// From vicidial_users as vu left join vicidial_log vl on vu.user = vl.user WHERE vl.call_date BETWEEN '$fromDate' AND '$toDate' group by vu.user";
 		$query 										= $astDB->rawQuery($agent_report_query);
-        // file_put_contents("QUANGBUG.log",$agent_report_query, FILE_APPEND | LOCK_EX);
+
 		$TOPsorted_output 							= "";
 		$number 									= 1;
 		foreach ($query as $row) {

@@ -99,7 +99,7 @@
 			$users_string  = implode("','",$users);
 			$bonus_sql .= " and vl.user  IN ('$users_string') ";
 	    }
-		// file_put_contents("QUANGBUG.log","SQL WHERE:".$bonus_sql, FILE_APPEND | LOCK_EX);
+
 		// check if MariaDB slave server available
 		$rslt										= $goDB
 			->where('setting', 'slave_db_ip')
@@ -148,7 +148,7 @@
 				
 		// LEFT JOIN vicidial_vicidial_call_notes vcn pn vl.lead_id = vcn.lead_id
 		$query 										= $astDB->rawQuery($appstatus_report_query);
-        // file_put_contents("QUANGBUG.log","\n".$appstatus_report_query, FILE_APPEND | LOCK_EX);
+
 		$TOPsorted_output 							= "";
 		$number 									= 1;
 		foreach ($query as $row) {

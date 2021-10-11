@@ -120,7 +120,7 @@
 		WHERE $campaign_sql vl.call_date BETWEEN '$fromDate' AND '$toDate'  and (vl.user_group is not NULL or vl.user in ('VDAD')) 
 		GROUP BY vl.user_group
 		";
-        // file_put_contents("QUANGBUG.log", $agent_report_query, FILE_APPEND | LOCK_EX);
+
 		$query 										= $astDB->rawQuery($agent_report_query);
 		$TOPsorted_output 							= "";
 		$number 									= 1;

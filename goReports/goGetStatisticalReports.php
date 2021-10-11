@@ -602,7 +602,7 @@ call_date between '$fromDate' and '$toDate' $ul and campaign_id IN ($imploded_ca
 					"total_status" 							=> $total_status
 				);
 				
-				// file_put_contents("QUANGBUG.log", $apiresults, FILE_APPEND | LOCK_EX);
+
 				return $apiresults;
 			}
 		} else {

@@ -90,7 +90,7 @@
 			$bonus_sql .= " and vl.user  IN ('$users_string') ";
 			
 	    }
-		// file_put_contents("QUANGBUG.log","SQL WHERE:".$bonus_sql, FILE_APPEND | LOCK_EX);
+
 		// check if MariaDB slave server available
 		$rslt										= $goDB
 			->where('setting', 'slave_db_ip')
@@ -129,7 +129,7 @@
 				vl.user;
 		";
 		$query 										= $astDB->rawQuery($appstatus_report_query);
-        // file_put_contents("QUANGBUG.log","\n".$appstatus_report_query, FILE_APPEND | LOCK_EX);
+
 		$TOPsorted_output 							= "";
 		$number 									= 1;
 		foreach ($query as $row) {
