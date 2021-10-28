@@ -132,14 +132,14 @@
 				vlf.product_name, 
 				vlf.proposal_id,
 				vl.vendor_lead_code, 
-				vl.`user`, vu.user_group as usergroup,vl.identity_number, vl.phone_number
+				vlf.`user`, vu.user_group as usergroup,vl.identity_number, vl.phone_number
 			FROM
 				vicidial_list_full_loan AS vlf
 				JOIN
 				vicidial_list AS vl
 				ON 
 					vlf.lead_id = vl.lead_id
-				JOIN vicidial_users vu ON vl.USER = vu.user
+				JOIN vicidial_users vu ON vlf.USER = vu.user
 			LEFT JOIN  reject_reason rj on rj.reject_reason = vlf.reject_reason
 			WHERE
 				vlf.updated_at BETWEEN '$fromDate' AND '$toDate' and vlf.app_status NOT IN ('') $bonus_sql

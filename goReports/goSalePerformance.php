@@ -110,7 +110,7 @@
 		}
 		$appstatus_report_query = "
 			SELECT
-				vl.user,
+				vlf.user,
 				COUNT( CASE WHEN vlf.app_status = 'SENT' THEN 1 END ) AS SENT,
 				COUNT( CASE WHEN vlf.app_status = 'FAIL_EKYC' THEN 1 END ) AS FAIL_EKYC,
 				COUNT( CASE WHEN vlf.app_status = 'FAIL_MANUAL_KYC' THEN 1 END ) AS FAIL_MANUAL_KYC,
@@ -126,7 +126,7 @@
 			WHERE
 				vlf.updated_at BETWEEN '$fromDate' and '$toDate' $bonus_sql
 			GROUP BY
-				vl.user;
+				vlf.user;
 		";
 		$query 										= $astDB->rawQuery($appstatus_report_query);
 
