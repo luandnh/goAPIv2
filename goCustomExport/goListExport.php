@@ -111,13 +111,27 @@ if (empty($goUser) || is_null($goUser)) {
 					$added_custom_SQL4 					= "vl.lead_id=ct.lead_id";
 				}
 			}
+			$collabrator_SQL = "";
+			$collabrator_col_SQL = "";
+			if ($list_id == 1151){
+				// ONLY FOR VTA COLLABRATOR
+				$collabrator_col_SQL = " , 
+				vc.sale_code, 
+				vc.full_name as ctv_full_name, 
+				vc.img_selfie as ctv_img_selfie, 
+				vc.identity_card_id as ctv_identity_card_id,
+				vc.phone_number  as ctv_phone_number ";
+				$collabrator_SQL = "LEFT OUTER JOIN vicidial_collaborator AS vc ON vc.referral_code = ct.referral_code ";
+			}
 
 			if ($added_custom_SQL3 != "") {
-				$stmt 									= "SELECT vl.lead_id AS lead_id,date_format(entry_date,'%Y-%m-%d %H:%i:%s') as entry_date,date_format(modify_date,'%Y-%m-%d %H:%i:%s') as modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,vl.phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,date_format(last_local_call_time, '%Y-%m-%d %H:%i:%s') as last_local_call_time,rank,owner{$header_columns} FROM vicidial_list vl LEFT OUTER JOIN {$added_custom_SQL3} ON {$added_custom_SQL4} WHERE vl.list_id='{$list_id}' ";
+				$stmt 									= "SELECT vl.lead_id AS lead_id,date_format(entry_date,'%Y-%m-%d %H:%i:%s') as entry_date,date_format(modify_date,'%Y-%m-%d %H:%i:%s') as modify_date,
+				(SELECT val.event_time from vicidial_agent_log val WHERE val.lead_id = vl.lead_id limit 1) as first_call ,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,vl.phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,vl.province,postal_code,country_code,gender,vl.date_of_birth,alt_phone,email,security_phrase,comments,called_count,date_format(last_local_call_time, '%Y-%m-%d %H:%i:%s') as last_local_call_time,rank,owner {$header_columns} $collabrator_col_SQL FROM vicidial_list vl LEFT OUTER JOIN {$added_custom_SQL3} ON {$added_custom_SQL4} $collabrator_SQL WHERE vl.list_id='{$list_id}' ";
 			} else {
-				$stmt 									= "SELECT lead_id,date_format(entry_date,'%Y-%m-%d %H:%i:%s') as entry_date,date_format(modify_date,'%Y-%m-%d %H:%i:%s') as modify_date,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,vl.phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,province,postal_code,country_code,gender,date_of_birth,alt_phone,email,security_phrase,comments,called_count,date_format(last_local_call_time, '%Y-%m-%d %H:%i:%s') as last_local_call_time,rank,owner FROM vicidial_list vl WHERE list_id='$list_id' ";
+				$stmt 									= "SELECT lead_id,date_format(entry_date,'%Y-%m-%d %H:%i:%s') as entry_date,date_format(modify_date,'%Y-%m-%d %H:%i:%s') as modify_date,
+				(SELECT val.event_time from vicidial_agent_log val WHERE val.lead_id = vl.lead_id limit 1) as first_call,status,user,vendor_lead_code,source_id,list_id,gmt_offset_now,called_since_last_reset,phone_code,vl.phone_number,title,first_name,middle_initial,last_name,address1,address2,address3,city,state,vl.province,postal_code,country_code,gender,vl.date_of_birth,alt_phone,email,security_phrase,comments,called_count,date_format(last_local_call_time, '%Y-%m-%d %H:%i:%s') as last_local_call_time,rank,owner FROM vicidial_list vl WHERE list_id='$list_id' ";
 			}
-			// file_put_contents("ExportList.log", "SQL : ".$stmt."\n", FILE_APPEND | LOCK_EX);
+			file_put_contents("ExportList.log", "SQL : ".$stmt."\n", FILE_APPEND | LOCK_EX);
 			$isRun = false;
 			$tmp = -1;
 			$running_time = 0;
