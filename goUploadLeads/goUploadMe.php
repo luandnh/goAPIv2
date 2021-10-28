@@ -170,7 +170,8 @@ if (($handle = fopen($csv_file, "r")) !== false)
         $identity_issued_on = preg_replace($field_regx, "", $col[20]);
         $identity_issued_on = date("Y-m-d", strtotime($identity_issued_on));
         $identity_issued_by = preg_replace($field_regx, "", $col[21]);
-        $partner_code = preg_replace($field_regx, "", $col[22]);
+        // $partner_code = preg_replace($field_regx, "", $col[22]);
+        $partner_code = "TEL";
         $entry_list_id = 0;
         $called_since_last_reset = "N";
         // TEST
@@ -238,7 +239,7 @@ if (($handle = fopen($csv_file, "r")) !== false)
             $identity_number = "";
             $identity_issued_on = "";
             $identity_issued_by = "";
-            $partner_code = "";
+            $partner_code = "TEL";
             //get arrayed lead mapping requests
             foreach ($standard_array as $l => $map_data)
             {
@@ -443,7 +444,7 @@ if (($handle = fopen($csv_file, "r")) !== false)
                     $astDB->where('list_id', explode(',', $goDUPLists) , 'in');
                     $rsltgoCheckCampPhoneList = $astDB->getOne('vicidial_list', 'phone_number');
                     $countCheckCampPhoneList = $astDB->getRowCount();
-
+                    go_logger($astDB->getLastQuery() ,"QUANGBUG.log");
                     if ($countCheckCampPhoneList < 1)
                     {
                         $USarea = substr($phone_number, 0, 3);
