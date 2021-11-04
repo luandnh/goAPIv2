@@ -250,14 +250,76 @@
 				$cf_query								= $astDB
 					->where("lead_id", $lead_id)
 					->getOne("custom_$list_id", $fields);
-							
+
 				if ($astDB->count > 0) {
 					foreach ($cf_query as $field => $value) {
 						//if($CF_fetch[$x] !== NULL)
 						$custom_fields_values[$field] 		=  str_replace(",", " | ", $value);
 					}
 				}
-
+				// ONLY FOR VTA 
+				if ($list_id == 1151){
+					$cb_query = $astDB
+					->where("lead_id", $lead_id)
+					->join('vicidial_collaborator vc', 'vc.referral_code = ct.referral_code', 'left')
+					->getOne('custom_1151 ct', 'vc.sale_code,vc.full_name as ctv_full_name');
+					
+					$ca1 = array
+					(
+						"field_id" => 671,
+						"list_id" => 1151,
+						"field_label" => "sale_code",
+						"field_name" => "CTV Sale code",
+						"field_description" => "",
+						"field_rank" => 12,
+						"field_help" => "",
+						"field_type" => "TEXT",
+						"field_options" =>"",
+						"field_size" => 100,
+						"field_max" => 100,
+						"field_default" => "",
+						"field_cost" => 1,
+						"field_required" => "N",
+						"name_position" => "TOP",
+						"multi_position" => "HORIZONTAL",
+						"field_order" => 1,
+						"field_encrypt" => "N",
+						"field_show_hide" => "DISABLED",
+						"field_duplicate" => "N",
+					);
+					
+					$ca2 = array
+					(
+						"field_id" => 671,
+						"list_id" => 1151,
+						"field_label" => "ctv_full_name",
+						"field_name" => "CTV Full Name",
+						"field_description" => "",
+						"field_rank" => 12,
+						"field_help" => "",
+						"field_type" => "TEXT",
+						"field_options" =>"",
+						"field_size" => 100,
+						"field_max" => 100,
+						"field_default" => "",
+						"field_cost" => 1,
+						"field_required" => "N",
+						"name_position" => "TOP",
+						"multi_position" => "HORIZONTAL",
+						"field_order" => 1,
+						"field_encrypt" => "N",
+						"field_show_hide" => "DISABLED",
+						"field_duplicate" => "N",
+					);
+					if ($astDB->count > 0) {
+						array_push($custom_fields,$ca1);
+						array_push($custom_fields,$ca2);
+						foreach ($cb_query as $field => $value) {
+							//if($CF_fetch[$x] !== NULL)
+							$custom_fields_values[$field] 		=  str_replace(",", " | ", $value);
+						}
+					}
+				}
 				$apiresults 							= array(
 					"result" 								=> "success", 
 					"data" 									=> $data, 
