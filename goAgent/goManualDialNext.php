@@ -1768,8 +1768,12 @@ if ($sipIsLoggedIn) {
             $astDB->orderBy('notesid', 'desc');
             $CNotes = $astDB->getOne('vicidial_call_notes', 'call_notes');
             $call_notes = (!is_null($CNotes['call_notes'])) ? $CNotes['call_notes'] : '';
-            
+            // GET BASIC REQUESTIDs 
+            $astDB->where('lead_id', $lead_id);
+            $basic = $astDB->get('vicidial_basic_info');
+            // 
             $LeaD_InfO = array(
+                'basic_requestid' =>$basic,
                 'MqueryCID' => (isset($MqueryCID)) ? $MqueryCID : "",
                 'lead_id' => $lead_id,
                 'status' => $dispo,

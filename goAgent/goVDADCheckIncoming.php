@@ -960,8 +960,10 @@ if ($is_logged_in) {
         $astDB->orderBy('notesid', 'desc');
         $CNotes = $astDB->getOne('vicidial_call_notes', 'call_notes');
         $call_notes = (!is_null($CNotes['call_notes'])) ? $CNotes['call_notes'] : '';
-
+        $astDB->where('lead_id', $lead_id);
+        $basic = $astDB->get('vicidial_basic_info');
         $LeaD_InfO = array(
+            'basic_requestid' =>$basic,
             'app_status' => $app_status,
             'call_status'=> $call_status,
             'reject_reason'=> $reject_reason,
