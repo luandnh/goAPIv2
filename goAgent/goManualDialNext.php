@@ -21,7 +21,6 @@
 */
 
 $agent = get_settings('user', $astDB, $goUser);
-
 $user = $agent->user;
 $user_group = $agent->user_group;
 $phone_login = (isset($phone_login)) ? $phone_login : $agent->phone_login;
@@ -102,7 +101,7 @@ if ($sipIsLoggedIn) {
     $phone_settings = get_settings('phone', $astDB, $phone_login, $phone_pass);
     //$server_ip = $phone_settings->server_ip;
     //$ext_context = $phone_settings->ext_context;
-    
+    $target_phone = $phone_number;
     $campaign_settings = get_settings('campaign', $astDB, $campaign);
     //$dial_timeout = $campaign_settings->dial_timeout;
     //$dial_prefix = $campaign_settings->dial_prefix;
@@ -181,6 +180,7 @@ if ($sipIsLoggedIn) {
     $agent_log_id = $query['agent_log_id'];
     
     $astDB->where('phone_number', $phone_number);
+    $astDB->orWhere('alt_phone', $phone_number);
     $astDB->where('lead_id', $lead_id);
     $query = $astDB->getOne('vicidial_list');
     if (count($query)) {
@@ -484,6 +484,7 @@ if ($sipIsLoggedIn) {
                         
                         //$stmt="SELECT lead_id FROM vicidial_list where phone_number='$phone_number' $list_idSQL order by modify_date desc LIMIT 1;";
                         $astDB->where('phone_number', $phone_number);
+                        $astDB->orWhere('alt_phone', $phone_number);
                         $astDB->orderBy('modify_date', 'desc');
                         $rslt = $astDB->getOne('vicidial_list', 'lead_id');
                         $man_leadID_ct = $astDB->getRowCount();
@@ -1073,7 +1074,6 @@ if ($sipIsLoggedIn) {
             }
 
             $called_count++;
-
             if ( (strlen($agent_dialed_type) < 3) or (strlen($agent_dialed_number) < $manual_dial_min_digits) ) {
                 if (strlen($agent_dialed_type) < 3)
                     {$agent_dialed_type = 'MAIN';}
@@ -1083,11 +1083,13 @@ if ($sipIsLoggedIn) {
                     
                 if ($phone_number !== '' && strlen($phone_number) > 3) {
                     $agent_dialed_number = $phone_number;
-                } else if ($agent_dialed_type == 'ALT' && ((strlen($phone_number) <= 3) or (strlen($phone_number) < $manual_dial_min_digits))) {
+                } 
+                else if ($agent_dialed_type == 'ALT' && ((strlen($phone_number) <= 3) or (strlen($phone_number) < $manual_dial_min_digits))) {
                     $agent_dialed_number = ($alt_phone !== '' ? $alt_phone : $address3);
                 }
             }
-            if ( (strlen($callback_id) > 0) and (strlen($lead_id) > 0) ) {
+            // if ( (strlen($callback_id) > 0) and (strlen($lead_id) > 0) ) {
+            if ( (strlen($alt_phone) > 0) and (strlen($lead_id) > 0) ) {
                 if ($agent_dialed_type == 'ALT')
                     {$agent_dialed_number = $alt_phone;}
                 if ($agent_dialed_type == 'ADDR3')
@@ -1097,7 +1099,8 @@ if ($sipIsLoggedIn) {
                     $agent_dialed_number = $orig_phone;
                 }
             }
-
+            $agent_dialed_number = $target_phone;
+            // go_logger($lead_id);
             ##### BEGIN check for postal_code and phone time zones if alert enabled
             $post_phone_time_diff_alert_message = '';
             //$stmt="SELECT post_phone_time_diff_alert,local_call_time,owner_populate FROM vicidial_campaigns where campaign_id='$campaign';";
