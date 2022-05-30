@@ -79,13 +79,13 @@
 					$astDB->where("user_group", $log_group);
 					$astDB->orWhere("user_group", "---ALL---");
 				} else {
-					if (strtoupper($log_group) != 'ADMIN') {
-						if ($userlevel > 8) {
-							$astDB->where("user_group", $log_group);
-							$astDB->orWhere("user_group", "---ALL---");
-						}
-					}					
-				}				
+					// if (strtoupper($log_group) != 'ADMIN') {
+					// 	if ($userlevel > 8) {
+					// 		$astDB->where("user_group", $log_group);
+					// 		$astDB->orWhere("user_group", "---ALL---");
+					// 	}
+					// }					
+				}			
 				
 				$astDB->where("lead_id", $lead_id);
 				$astDB->orderBy("call_date", "DESC");
@@ -258,16 +258,18 @@
 					}
 				}
 				// ONLY FOR VTA 
-				if ($list_id == 1151){
+				if ($list_id == 1151 || $list_id == 1152){
 					$cb_query = $astDB
 					->where("lead_id", $lead_id)
 					->join('vicidial_collaborator vc', 'vc.referral_code = ct.referral_code', 'left')
-					->getOne('custom_1151 ct', 'vc.sale_code,vc.full_name as ctv_full_name');
+					// ->getOne('custom_1151 ct', 'vc.sale_code,vc.full_name as ctv_full_name');
+					->getOne('custom_'.$list_id.' ct', 'vc.sale_code,vc.full_name as ctv_full_name');
 					
 					$ca1 = array
 					(
 						"field_id" => 671,
-						"list_id" => 1151,
+						// "list_id" => 1151,
+						"list_id" => $list_id,
 						"field_label" => "sale_code",
 						"field_name" => "CTV Sale code",
 						"field_description" => "",
@@ -291,7 +293,8 @@
 					$ca2 = array
 					(
 						"field_id" => 671,
-						"list_id" => 1151,
+						// "list_id" => 1151,
+						"list_id" => $list_id,
 						"field_label" => "ctv_full_name",
 						"field_name" => "CTV Full Name",
 						"field_description" => "",
@@ -329,7 +332,8 @@
 					"agentlog" 								=> $alog_data, 
 					"record" 								=> $rlog_data,
 					"custom_fields" 						=> $custom_fields,
-					"custom_fields_values"					=> $custom_fields_values
+					"custom_fields_values"					=> $custom_fields_values,
+					"lead_id"								=> $lead_id
 				);			
 			} else {
 				$err_msg 								= error_handle("41004", "lead_id");
