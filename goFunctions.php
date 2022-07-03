@@ -264,7 +264,64 @@
 		$astDB->orderBy('campaign_id', 'desc');
 		$result 								= $astDB->get('vicidial_campaigns', NULL, $cols);
 		$campaigns								= array();
+
+		if ($astDB->count > 0) {
+			foreach($result as $fresults){
+				$dataCampID[] 					= $fresults['campaign_id'];
+				$dataCampName[] 				= $fresults['campaign_name'];// .$fresults['dial_method'].$fresults['active'];
+				$dataDialMethod[] 				= $fresults['dial_method'];
+				$dataActive[] 					= $fresults['active'];
+			}
+			
+		}
 		
+        switch ($type) {
+            case "all":		
+				$campaigns	 					= array(
+					"campaign_id" 					=> $dataCampID, 
+					"campaign_name" 				=> $dataCampName, 
+					"dial_method" 					=> $dataDialMethod, 
+					"active" 						=> $dataActive
+				);
+				
+                break;
+                
+            case "status":		
+				$campaigns	 					= array(
+					"campaign_id" 					=> $dataCampID, 
+					"active" 						=> $dataActive
+				);
+				
+                break;                
+            
+            default: 
+				$campaigns	 					= $dataCampID;
+		}
+		
+		return $campaigns;
+    }
+    function allowed_campaigns_admin($log_group, $goDB, $astDB, $type=null) {
+		if (checkIfTenant($log_group, $goDB)) {
+			$astDB->where("user_group", $log_group);
+			//$astDB->orWhere('user_group', "---ALL---");
+		} else {
+			if(strtoupper($log_group) !== "ADMIN"){
+				$astDB->where('user_group', $log_group);
+				$astDB->orWhere('user_group', "---ALL---");
+			}
+		}    
+
+		$cols 									= array(
+			"campaign_id",
+			"campaign_name",
+			"dial_method",
+			"active"
+		);
+		
+		$astDB->orderBy('campaign_id', 'desc');
+		$result 								= $astDB->get('vicidial_campaigns', NULL, $cols);
+		$campaigns								= array();
+
 		if ($astDB->count > 0) {
 			foreach($result as $fresults){
 				$dataCampID[] 					= $fresults['campaign_id'];
@@ -2035,5 +2092,15 @@
 
     function _remove_empty_internal($value) {
 		return !empty($value) || $value === 0;
-    }	
+    }
+
+    function go_logger($msg, $data, $path="go_debug.log"){
+        $fh = fopen( $path, 'a') or die("Can't open file.");
+        $results = print_r($data, true);
+        fwrite($fh, $msg);
+        fwrite($fh, $results);
+        fwrite($fh, "\n-----------------------------------------\n");
+        fwrite($fh, "\n");
+        fclose($fh);
+    }
 ?>

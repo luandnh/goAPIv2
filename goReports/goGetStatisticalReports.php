@@ -78,7 +78,7 @@
 			}			
 		}
         
-		$tenant                                     = ($userlevel < 9 && $log_group !== "ADMIN") ? 1 : 0;
+		$tenant                                     = (!in_array($userlevel, [7,8]) && $userlevel < 9 && $log_group !== "ADMIN") ? 1 : 0;
 		
 		//ALL CAMPAIGNS
 		if ("ALL" === strtoupper($campaign_id)) {
@@ -96,10 +96,10 @@
 		
 		$imploded_camp = "'".implode("','", $array_camp)."'";
 	
-		if ($goapiaccess > 0 && $userlevel > 7) {
+		if ($goapiaccess > 0 && $userlevel >= 7) {
 			// Agent Statistics
 			if ($pageTitle == 'stats') {			
-				if ($log_group !== "ADMIN") {
+				if ($log_group !== "ADMIN" && !in_array($userlevel, [7,8])) {
 					if($log_group !== "GOADMIN")
 						$ul = "AND user_group = '$log_group'";
 				} else {
@@ -246,6 +246,9 @@ campaign_id IN ($imploded_camp) and date_format(call_date, '%Y-%m-%d %H:%i:%s') 
 #length_in_sec>'0' and 
 date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $ul and campaign_id IN ($imploded_camp) group by status $DunionSQL) t group by status;");
 					$total_status                                           = $astDB->getRowCount();
+					$a = "select status, sum(ccount) as ccount from (select status,count(vl.lead_id) as ccount from vicidial_log vl where 
+					#length_in_sec>'0' and 
+					date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $ul and campaign_id IN ($imploded_camp) group by status $DunionSQL) t group by status;";
 					
 					if (count($qtotalstatus) > 0) {
 						foreach ($qtotalstatus as $row) {
@@ -276,6 +279,7 @@ date_format(call_date, '%Y-%m-%d %H:%i:%s') between '$fromDate' and '$toDate' $u
 						"ccount" 							=> $ccount, 
 						"query" 							=> $qtotalcallsmade
 					);
+					
 				}
 				
 				if ($request == 'weekly') {

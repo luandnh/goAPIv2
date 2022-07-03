@@ -74,7 +74,6 @@ if (empty($goUser) || is_null($goUser)) {
         );
         $astDB->groupBy("vug.user_group");
         $select                                     = $astDB->get("vicidial_user_groups vug", NULL, $cols);
-
         if ($astDB->count > 0) {
             $apiresults                             = array(
                 "result"                             => "success",

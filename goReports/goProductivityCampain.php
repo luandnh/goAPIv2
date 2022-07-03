@@ -26,7 +26,7 @@
 //error_reporting(E_ALL);
 
     include_once("goAPI.php");
-
+	$updateUsergroup = $astDB->rawQuery("Update vicidial_log vl INNER JOIN vicidial_users vu on vl.user = vu.user set vl.user_group = vu.user_group where vl.user_group is NULL");
     $fromDate 										= $astDB->escape($_REQUEST['fromDate']);
     $toDate 										= $astDB->escape($_REQUEST['toDate']);
     $userId 									= $astDB->escape($_REQUEST['userId']);
@@ -48,6 +48,14 @@
 	    $toDate 									= date("Y-m-d") . " 23:59:59";
     	//die($fromDate." - ".$toDate);                                                                 => $err_msg
     } else {
+		$fresults										= $astDB
+			->where("user", $goUser)
+			->where("pass_hash", $goPass)
+			->getOne("vicidial_users", "user,user_level");
+		
+		$goapiaccess									= $astDB->getRowCount();
+		$userlevel										= $fresults["user_level"];
+
 		$SELECTQuery = $astDB->rawQuery("Select sub_user_group from vicidial_sub_user_groups where user_group='".$log_group."'");
 		foreach($SELECTQuery as $user_group){
 			$user_groups[] = $user_group["sub_user_group"];
@@ -69,7 +77,8 @@
 				$astDB->where("vl.user_group", $user_groups,"IN");
 				$bonus_sql = "AND vl.user_group IN('".$user_group_string."') ";
 	    } else {
-            if (strtoupper($log_group) != 'ADMIN') {
+			
+            if (strtoupper($log_group) != 'ADMIN' && !in_array($userlevel, [7,8])) {
                 // if ($user_level > 8) {
                 //     $astDB->where("user_group", $log_group);
                 // }
@@ -117,6 +126,7 @@
 		GROUP BY vl.campaign_id";
         // file_put_contents("QUANGBUG.log", $agent_report_query, FILE_APPEND | LOCK_EX);
 		$query 										= $astDB->rawQuery($agent_report_query);
+		
 		$TOPsorted_output 							= "";
 		$number 									= 1;
 		foreach ($query as $row) {

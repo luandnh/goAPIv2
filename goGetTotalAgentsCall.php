@@ -1,10 +1,9 @@
 <?php
  /**
- * @file 		goGetTotalAnsweredCalls.php
+ * @file 		goGetTotalAgentsCall.php
  * @brief 		API for Dashboard
  * @copyright 	Copyright (c) 2018 GOautodial Inc.
  * @author		Demian Lizandro A. Biscocho
- * @author		Jeremiah Sebastian Samatra
  * @author     	Chris Lomuntad
  *
  * @par <b>License</b>:
@@ -24,8 +23,7 @@
 
     include_once ("goAPI.php");
  
-	$campaigns 											= allowed_campaigns_admin($log_group, $goDB, $astDB);
-	$NOW 												= date("Y-m-d");	
+	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
 
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
@@ -41,11 +39,6 @@
 			"result" 										=> "Error: Session User Not Defined."
 		);
 	} else {
-        $astDB->where('user_group', $log_group);
-        $allowed_camps = $astDB->getOne('vicidial_user_groups', 'allowed_campaigns');
-        $allowed_campaigns = $allowed_camps['allowed_campaigns'];
-        $allowed_campaigns = explode(" ", trim($allowed_campaigns));
-        
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
 			->where("user", $goUser)
@@ -56,20 +49,18 @@
 		$userlevel										= $fresults["user_level"];
 		
 		if ($goapiaccess > 0 && $userlevel >= 7) {
-			if (is_array($allowed_campaigns)) {
-                if (!preg_match("/ALL-CAMPAIGN/", $allowed_camps['allowed_campaigns'])) {
-                    $astDB->where("campaign_id", $allowed_campaigns, "IN");
-                }
-				
+			if (is_array($campaigns)) {	
+				$calls 									= array( 'INCALL', 'QUEUE', '3-WAY', 'PARK' );		
 				$data									= $astDB
-					->where("update_time", array("$NOW 09:00:00", "$NOW 21:00:00"), "BETWEEN")
-					->getValue("vicidial_campaign_stats", "sum(answers_today)");
+					->where("campaign_id", $campaigns, "IN")
+					->where("status", $calls, "IN")
+					->where("user_level", 4, "!=")
+					->getValue("vicidial_live_agents", "count(*)");
 				
 				$apiresults 							= array(
-					"result" 								=> "success",
-					//"query"								=> $astDB->getLastQuery(),
+					"result" 								=> "success", 
 					"data" 									=> $data
-				);		
+				);	
 			}
 		} else {
 			$err_msg 									= error_handle("10001");
@@ -79,5 +70,5 @@
 			);		
 		}
 	}
-	
+    
 ?>

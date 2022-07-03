@@ -1,11 +1,10 @@
 <?php
 /**
- * @file        goGetUserGroupsList.php
- * @brief       API to get all user group details
- * @copyright   Copyright (c) 2018 GOautodial Inc.
- * @author      Demian Lizandro A. Biscocho 
- * @author      Alexander Jim H. Abenoja
- * @author      Jeremiah Sebastian V. Samatra
+ * @file 		goGetUserGroupInfo.php
+ * @brief 		API to get specific User Group Details
+ * @copyright 	Copyright (c) 2018 GOautodial Inc.
+ * @author		Demian Lizandro A. Biscocho
+ * @author     	Alexander Jim H. Abenoja
  *
  * @par <b>License</b>:
  *  This program is free software: you can redistribute it and/or modify
@@ -20,9 +19,13 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+**/
+
 	include_once ("goAPI.php");
-	
+		
+    // POST or GET Variables
+    $user_group 										= $astDB->escape($_REQUEST["user_group"]);	
+    
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {
 		$apiresults 									= array(
@@ -36,56 +39,68 @@
 		$apiresults 									= array(
 			"result" 										=> "Error: Session User Not Defined."
 		);
+	} elseif (empty($user_group) || is_null($user_group)) { 
+		$apiresults 									= array(
+			"result" 										=> "Error: Set a value for User Group."
+		); 
 	} else {
 		// check if goUser and goPass are valid
 		$fresults										= $astDB
 			->where("user", $goUser)
 			->where("pass_hash", $goPass)
-			->getOne("vicidial_users", "user,user_level,user_group");
+			->getOne("vicidial_users", "user,user_level");
 		
 		$goapiaccess									= $astDB->getRowCount();
 		$userlevel										= $fresults["user_level"];
-		$user_group										= $fresults["user_group"];
 		
-		if ($goapiaccess > 0 && $userlevel > 7) {	
+		if ($goapiaccess > 0 && $userlevel >= 7) {	
 			// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 			// every time we need to filter out requests
-			//$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
-			$tenant                                     = ($userlevel < 9 && $log_group !== "ADMIN") ? 1 : 0;
+			$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
 			
 			if ($tenant) {
 				$astDB->where("user_group", $log_group);
-				$group_type								= "Multi-tenant";
 			} else {
-				if (strtoupper($log_group) != 'ADMIN') {
+				if (strtoupper($log_group) != "ADMIN") {
 					if ($userlevel > 8) {
 						$astDB->where("user_group", $log_group);
 					}
 				}	
-				
-				$group_type 							= "Default";				
-			}			
-			
-			$cols 										= array(
+			}	
+		
+			$cols										= array(
 				"user_group", 
 				"group_name", 
-				"forced_timeclock_login"
+				"allowed_campaigns", 
+				"forced_timeclock_login", 
+				"shift_enforcement", 
+				"admin_viewable_groups"
 			);
 			
-			$select 									= $astDB->get("vicidial_user_groups", NULL, $cols);
+			$query 										= $astDB
+				->where("user_group", $user_group)
+				->orderBy("user_group","asc")
+				->getOne("vicidial_user_groups", $cols);
+			
+			$querygo 									= $goDB
+				->where("user_group", $user_group)
+				->getOne("user_access_group", "group_level,permissions");		
+			
+			if ($goDB->count > 0) {
+				$data 									= array_merge($query, $querygo);
+			} else {
+				$data									= $query;
+			}
+			
+			
 			if ($astDB->count > 0) {
-				foreach($select as $fresults){
-					$dataUserGroup[] 					= $fresults['user_group'];
-					$dataGroupName[] 					= $fresults['group_name'];
-					$dataGroupType[] 					= $group_type;
-					$dataForced[] 						= $fresults['forced_timeclock_login'];
-				}
 				$apiresults 							= array(
 					"result" 								=> "success", 
-					"user_group" 							=> $dataUserGroup, 
-					"group_name" 							=> $dataGroupName, 
-					"group_type" 							=> $dataGroupType, 
-					"forced_timeclock_login" 				=> $dataForced
+					"data" 									=> $data
+				);
+			} else {
+				$apiresults 							= array(
+					"result" 								=> "Error: User Group doesn't exist."
 				);
 			}
 		} else {

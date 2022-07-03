@@ -24,7 +24,7 @@
 
     include_once ("goAPI.php");
 
-	$campaigns 											= allowed_campaigns_admin($log_group, $goDB, $astDB);
+	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
 
 	// Error Checking
 	if (empty($goUser) || is_null($goUser)) {

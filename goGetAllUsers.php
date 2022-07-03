@@ -63,11 +63,11 @@ if (empty($goUser) || is_null($goUser)) {
 			$astDB->orWhere("user_group", $tmp_groups, "IN");
 		} else {
 			if (strtoupper($log_group) != 'ADMIN') {
-				if ($userlevel > 8) {
+				// if ($userlevel > 8) {
 				$astDB->where("user_group", $log_group);
 				$astDB->orWhere("user_group", "---ALL---");
-				$astDB->orWhere("user_group", $tmp_groups, "IN");
-				}
+				// $astDB->orWhere("user_group", $tmp_groups, "IN");
+				// }
 			}
 		}
 		unset($tmp_groups);
@@ -87,6 +87,7 @@ if (empty($goUser) || is_null($goUser)) {
 			->where("user_level", 4, "!=")
 			->orderBy("user", "asc")
 			->get("vicidial_users", NULL, $cols);
+
 		if ($astDB->count > 0) {
 			foreach ($query as $fresults) {
 				$dataUserID[] 						= $fresults['user_id'];

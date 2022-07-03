@@ -228,7 +228,8 @@
 		}
 	}
 	
-	if ($log_group !== "ADMIN") {
+	// file_put_contents("QUANGBUG.log",$log_group, FILE_APPEND | LOCK_EX);
+	if ($log_group !== "ADMIN" && !in_array($userlevel, [7,8])) {
 		if ($log_group !== 'SUPERVISOR') {
 			$stringv 								= go_getall_allowed_users($log_group);
 			$user_group_SQL 						= "AND vl.user IN ($stringv)";
@@ -366,7 +367,7 @@
 			$limit_SQL;";
     }
 	$result = $astDB->rawQuery($query);
-
+	
 	//$apiresults = array ( "QUERY" => $query, "EXECUTED LAST" => $astDB->getLastQuery(), "ANY DATA" => $result);
 
 	// CONVERT RETURN OF rawQuery to Arrays

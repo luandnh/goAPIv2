@@ -23,7 +23,7 @@
 
     include_once ("goAPI.php");
  
-	$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
+	$campaigns 											= allowed_campaigns_admin($log_group, $goDB, $astDB);
 
 	// ERROR CHECKING 
 	if (empty($goUser) || is_null($goUser)) {
@@ -48,7 +48,7 @@
 		$goapiaccess									= $astDB->getRowCount();
 		$userlevel										= $fresults["user_level"];
 		
-		if ($goapiaccess > 0 && $userlevel > 7) {
+		if ($goapiaccess > 0 && $userlevel >= 7) {
 			if (is_array($campaigns)) {	
 				$calls 									= array( 'INCALL', 'QUEUE', '3-WAY', 'PARK' );		
 				$data									= $astDB

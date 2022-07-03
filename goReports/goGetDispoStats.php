@@ -63,7 +63,7 @@
 		// set tenant value to 1 if tenant - saves on calling the checkIfTenantf function
 		// every time we need to filter out requests
 		//$tenant										=  (checkIfTenant ($log_group, $goDB)) ? 1 : 0;
-        $tenant                                     = ($userlevel < 9 && $usergroup !== "ADMIN") ? 1 : 0;
+        $tenant                                     = ($userlevel < 9 && $usergroup !== "ADMIN" && !in_array($userlevel, [7,8])) ? 1 : 0;
 			
 		// check if MariaDB slave server available
 		$rslt										= $goDB
@@ -86,7 +86,7 @@
 		if ($tenant) {
 			$astDB->where("user_group", $usergroup);
 		} else {
-			if (strtoupper($usergroup) != 'ADMIN') {
+			if (strtoupper($usergroup) != 'ADMIN' && !in_array($userlevel, [7,8])) {
 				if ($user_level < 9) {
 					$astDB->where("user_group", $usergroup);
 				}
