@@ -26,7 +26,7 @@
 
 include_once("goAPI.php");
 
-$campaigns 											= allowed_campaigns($log_group, $goDB, $astDB);
+$campaigns 											= allowed_campaigns_admin($log_group, $goDB, $astDB);
 $search 											= $astDB->escape($_REQUEST['search']);
 $disposition_filter 								= $astDB->escape($_REQUEST['disposition_filter']);
 $list_filter 										= $astDB->escape($_REQUEST['list_filter']);
@@ -75,7 +75,7 @@ if (empty($goUser) || is_null($goUser)) {
 	$goapiaccess									= $astDB->getRowCount();
 	$userlevel										= $fresults["user_level"];
 
-	if ($goapiaccess > 0 && $userlevel > 7) {
+	if ($goapiaccess > 0 && $userlevel >= 7) {
 		if (is_array($campaigns)) {
 			$listids								= $astDB
 				->where("campaign_id", $campaigns, "IN")
