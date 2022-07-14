@@ -138,11 +138,22 @@
 		// Nho bo comment 131
 		//  AND vdl.sip_hangup_cause not in (100)
 		$query 										= $astDB->rawQuery($agent_report_query);
-		
+		$date1 = strtotime($fromDate);
+		$date2 = strtotime($toDate);
+		$newformat1 = date('d-m-Y',$date1);
+		$newformat2 = date('d-m-Y',$date2);
+		$string_time = "";
+		if ($newformat1 == $newformat2){
+				$string_time = $newformat1;
+		}else{
+			$string_time = $newformat1."_".$newformat2;
+		}
+
 		$TOPsorted_output 							= "";
 		$number 									= 1;
 		foreach ($query as $row) {
 			$TOPsorted_output[] 					.= '<tr>';
+			$TOPsorted_output[] 					.= '<td nowrap>'.$string_time .'</td>';
 			$TOPsorted_output[] 					.= '<td nowrap>'.$row['user_group'].'</td>';
 			$TOPsorted_output[] 					.= '<td nowrap>'.$row['user'].'</td>';
 			$TOPsorted_output[] 					.= '<td nowrap>'.$row['total_call'].'</td>';
