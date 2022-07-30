@@ -218,5 +218,4 @@ if (empty($goUser) || is_null($goUser)) {
 			"result" 									=> $err_msg
 		);
 	}
-	go_logger("aaa ", $astDB, "anhle.log");
 }

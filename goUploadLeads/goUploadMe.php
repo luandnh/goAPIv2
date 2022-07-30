@@ -68,7 +68,6 @@ $duplicates = 0;
 if (($handle = fopen($csv_file, "r")) !== false)
 {
     $getHeder = fgetcsv($handle);
-    //go_logger('getHeader', $getHeder, "anhle.log");
     //$goInsertSuccess = 0;
     //$array 21 last column
     //for custom fields start GLOBAL varaibles
@@ -162,9 +161,6 @@ if (($handle = fopen($csv_file, "r")) !== false)
         $identity_issued_on = preg_replace($field_regx, "", $col[20]);
         $identity_issued_on = date("Y-m-d", strtotime($identity_issued_on));
         $identity_issued_by = preg_replace($field_regx, "", $col[21]);
-        //go_logger("identity_number ", $identity_number, "anhle.log");
-        //go_logger("identity_issued_on ", $identity_issued_on, "anhle.log");
-        //go_logger("identity_issued_by ", $identity_issued_by, "anhle.log");
         $partner_code = preg_replace($field_regx, "", $col[22]);
         $entry_list_id = 0;
         $called_since_last_reset = "N";
@@ -776,12 +772,10 @@ if (($handle = fopen($csv_file, "r")) !== false)
                             array_push($goCustomUpdateData, "$goHeaderOfCustomFields='$goCustomValues'");
 
                         }
-//go_logger("track ", $goGetLastCustomFiledsName2, "anhle.log");
                         $goHeaderOfCustomFields = implode(",", $goGetLastCustomFiledsName2);
                         $goCustomValues = implode(",", $goCustomValuesData);
                         $goCustomUpdate = implode(", ", $goCustomUpdateData);
                         $goQueryCustomFields = "INSERT INTO custom_$theList(lead_id, $goHeaderOfCustomFields) VALUES('$goLastInsertedLeadIDNODUP', $goCustomValues) ON DUPLICATE KEY UPDATE $goCustomUpdate";
-//go_logger("zzz ", $goQueryCustomFields, "anhle.log");
                         $rsltGoQueryCustomFields = $astDB->rawQuery($goQueryCustomFields);
                     }
                 }
@@ -849,7 +843,7 @@ function goGetCampaignList($link, $goCampaignID)
     $link->where('campaign_id', $goCampaignID);
     $rsltgoCheckCamp = $link->get('vicidial_lists', null, 'list_id');
     $countResultCamp = $link->getRowCount();
-
+    $goDUPLists = "";
     foreach ($rsltgoCheckCamp as $fresultsDup)
     {
         $goDUPLists .= $fresultsDup['list_id'] . ",";
@@ -864,7 +858,6 @@ function goCheckCustomFieldsName($link, $goCClistID, $gocustomFieldsCSV)
     $goCustomCheckQuery = "SELECT EXISTS(SELECT $gocustomFieldsCSV FROM custom_$goCClistID)";
     $customCheck = $link->rawQuery($goCustomCheckQuery);
     $countCustomCheck = $link->getRowCount();
-    //go_logger("goCustomCheckQuery", $goCustomCheckQuery, "anhle.log");
     if ($countCustomCheck === 0)
     {
         return "error";

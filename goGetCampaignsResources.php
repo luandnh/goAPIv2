@@ -107,7 +107,6 @@
 			$astDB->orderBy("campaign_id", "ASC");			 
 			$rsltv 										= $astDB->get("vicidial_hopper as vh", 100, "COUNT(vh.campaign_id) as mycnt, vl.campaign_id, vl.campaign_name, vl.local_call_time, vl.user_group");			
 			$data 										= array();
-			go_logger("aaa ", $astDB, "anhle.log");
 			if ($astDB->count > 0) {
 				foreach ($rsltv as $fresults) {
 					array_push($data, $fresults);
